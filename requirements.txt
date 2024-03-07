@@ -1,2 +1,3 @@
 requests
 pinecone-client
+llama-index

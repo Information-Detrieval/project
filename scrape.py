@@ -3,6 +3,13 @@ import pickle
 from bs4 import BeautifulSoup
 import os
 
+from llama_index.core import (
+    VectorStoreIndex,
+    SimpleDirectoryReader,
+    load_index_from_storage,
+    Settings,
+    PromptTemplate,
+)
 
 class WebScraper:
     def __init__(self, websites):
