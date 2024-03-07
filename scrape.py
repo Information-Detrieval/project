@@ -1,3 +1,5 @@
+import re
+
 import requests
 import pickle
 from bs4 import BeautifulSoup
@@ -32,6 +34,10 @@ class WebScraper:
                 filename = self._get_filename(website)
                 html_filepath = os.path.join(self.html_dir, f"{filename}.html")
                 pkl_filepath = os.path.join(self.pkl_dir, f"{filename}.txt")
+
+                self._write_to_file(pkl_filepath+".txt", data)
+                # remove repeated blank lines, but retain single new lines
+                data = re.sub('\n{2,}', '\n', data)
 
                 self._write_to_file(html_filepath, r.text)
                 self._write_to_file(pkl_filepath, data)
