@@ -23,12 +23,16 @@ from pinecone import Pinecone, ServerlessSpec
 class DataPipeline:
     def __init__(self):
         self.pkl_dir = os.path.join(os.getcwd(), "website_data" , "pkl")
-        self.OPENAI_API_KEY = "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"
+        self.OPENAI_API_KEY = "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"
         self.PINECONE_API_KEY = "8a73267f-d64d-4d53-a5ae-0a241afd5517"
         os.environ["OPENAI_API_KEY"] = self.OPENAI_API_KEY
         os.environ["PINECONE_API_KEY"] = self.PINECONE_API_KEY
         self.PERSIST_DIR = os.path.join(os.getcwd(), "storage")
         self.pinecone_index = self.initialize_pinecone()
+
+    @staticmethod
+    def scrape_websites():
+        pass
 
     def initialize_pinecone(self):
         pc = Pinecone(api_key=self.PINECONE_API_KEY)
@@ -86,7 +90,7 @@ class DataPipeline:
             pickle.dump(documents, f)
 
         index = self.initialize_index(documents, vector_store)
-        retriever = VectorIndexRetriever(index, similarity_top_k=10)
+        retriever = VectorIndexRetriever(index, similarity_top_k=3)
         retrieved_nodes = retriever.retrieve(query_str)
         return (retrieved_nodes)
 
@@ -95,7 +99,8 @@ if __name__ == "__main__":
     temp = DataPipeline()
 
     query_str = "Who is Dhruv Kumar"
-    print(temp.run_query(query_str))
+    adi = temp.run_query(query_str)
+    print(adi)
 
 
 
