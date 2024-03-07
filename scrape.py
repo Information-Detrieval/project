@@ -35,6 +35,7 @@ class WebScraper:
     def scrape_websites(self):
         mapping = {}
         for website in self.websites:
+            print(f"Scraping {website}...")
             try:
                 r = requests.get(website)
                 soup = BeautifulSoup(r.text, 'html.parser')
@@ -43,9 +44,8 @@ class WebScraper:
                 filename = self._get_filename(website)
                 html_filepath = os.path.join(self.html_dir, f"{filename}.html")
                 pkl_filepath = os.path.join(self.pkl_dir, f"{filename}.txt")
-            
-                self._write_to_file(pkl_filepath, data)
-                
+
+                # self._write_to_file(pkl_filepath+".txt", data)
                 # remove repeated blank lines, but retain single new lines
                 data = re.sub('\n{2,}', '\n', data)
 
@@ -57,10 +57,11 @@ class WebScraper:
             except Exception as e:
                 print(f"Error scraping {website}: {e}")
 
-        with open(self.mapping_file, "wb") as f:
-            pickle.dump(mapping, f)
+        # with open(self.mapping_file, "wb") as f:
+        #     pickle.dump(mapping, f)
 
         return self.html_dir, self.pkl_dir
+
 
     def get_html(self, website):
         filename = self._get_filename(website)
@@ -116,7 +117,7 @@ class WebScraper:
 
 
 if __name__ == "__main__":
-    websites = ["https://www.iiitd.ac.in/dhruv"]
+    websites = ["https://www.iiitd.ac.in/dhruv", "https://www.iiitd.ac.in/about", "https://iiitd.ac.in/facilities/green_policy"]
     scraper = WebScraper(websites)
     # scraper.scrape_websites()
     scraper.scraped_sitemap("sitemap(1).xml")

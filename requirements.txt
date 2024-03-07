@@ -1,3 +1,4 @@
 requests~=2.31.0
 pinecone-client
 beautifulsoup4~=4.12.3
+llama-index-vector-stores-pinecone==0.1.4
