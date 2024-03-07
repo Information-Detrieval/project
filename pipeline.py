@@ -77,8 +77,14 @@ class DataPipeline:
     def run_query(self, query_str):
         llm = OpenAI(model="gpt-3.5-turbo-0125", api_key=self.OPENAI_API_KEY)
         vector_store = PineconeVectorStore(pinecone_index=self.pinecone_index)
-        with open ("website_data\pkl\www.iiitd.ac.in_dhruv.txt", "rb") as f:
-            documents = f.read()
+        documents = SimpleDirectoryReader(
+            os.path.join(os.getcwd(), "website_data", "text"),
+            recursive=True,
+        ).load_data()
+        print("Loading documents...")
+        with open(os.path.join(os.getcwd(), "website_data", "pkl", "documents.pkl"), "wb") as f:
+            pickle.dump(documents, f)
+
         index = self.initialize_index(documents, vector_store)
         retriever = VectorIndexRetriever(index, similarity_top_k=10)
         retrieved_nodes = retriever.retrieve(query_str)
