@@ -92,13 +92,13 @@ class DataPipeline:
         index = self.initialize_index(documents, vector_store)
         retriever = VectorIndexRetriever(index, similarity_top_k=3)
         retrieved_nodes = retriever.retrieve(query_str)
-        return (retrieved_nodes)
+        return retrieved_nodes
 
 
 if __name__ == "__main__":
     temp = DataPipeline()
 
-    query_str = "Who is Dhruv Kumar"
+    query_str = "What is solid waste"
     adi = temp.run_query(query_str)
     print(adi)
 
