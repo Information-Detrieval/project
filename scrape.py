@@ -12,6 +12,8 @@ from llama_index.core import (
     Settings,
     PromptTemplate,
 )
+import xml.etree.ElementTree as ET
+
 
 class WebScraper:
     def __init__(self, websites):
@@ -27,7 +29,7 @@ class WebScraper:
         return website.split("://")[1].replace("/", "_")
 
     def _write_to_file(self, filepath, content):
-        with open(filepath, "w") as f:
+        with open(filepath,  "w", encoding="utf-8") as f:
             f.write(content)
 
     def scrape_websites(self):
@@ -41,8 +43,9 @@ class WebScraper:
                 filename = self._get_filename(website)
                 html_filepath = os.path.join(self.html_dir, f"{filename}.html")
                 pkl_filepath = os.path.join(self.pkl_dir, f"{filename}.txt")
-
-                self._write_to_file(pkl_filepath+".txt", data)
+            
+                self._write_to_file(pkl_filepath, data)
+                
                 # remove repeated blank lines, but retain single new lines
                 data = re.sub('\n{2,}', '\n', data)
 
@@ -51,13 +54,13 @@ class WebScraper:
 
                 mapping[website] = f"{filename}.pkl"
 
-                return self.html_dir, self.pkl_dir
-
             except Exception as e:
                 print(f"Error scraping {website}: {e}")
 
         with open(self.mapping_file, "wb") as f:
             pickle.dump(mapping, f)
+
+        return self.html_dir, self.pkl_dir
 
     def get_html(self, website):
         filename = self._get_filename(website)
@@ -89,11 +92,34 @@ class WebScraper:
         except FileNotFoundError:
             print("Mapping file not found.")
 
+    # extract data from XML sitemap and call scrape
+
+    def scraped_sitemap(self, sitemap_file):
+        try:
+            with open(sitemap_file, "r", encoding="utf-8") as f:
+                sitemap_xml = f.read()
+                root = ET.fromstring(sitemap_xml)
+
+                # Define the namespace
+                ns = {"ns": "http://www.sitemaps.org/schemas/sitemap/0.9"}
+
+                # Use the namespace in the XPath expression
+                urls = [url.text for url in root.findall(".//ns:loc", namespaces=ns)]
+
+                self.websites = urls
+                self.scrape_websites()
+
+        except FileNotFoundError:
+            print(f"Sitemap file not found: {sitemap_file}")
+
+
+
 
 if __name__ == "__main__":
     websites = ["https://www.iiitd.ac.in/dhruv"]
     scraper = WebScraper(websites)
-    scraper.scrape_websites()
+    # scraper.scrape_websites()
+    scraper.scraped_sitemap("sitemap(1).xml")
 
     # with open("website_data/pkl/iiitd_ac_in_dhruv.pkl", "rb") as f:
     #     data = pickle.load(f)
