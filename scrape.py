@@ -17,7 +17,7 @@ class WebScraper:
     def __init__(self, websites):
         self.websites = websites
         self.html_dir = os.path.join(os.getcwd(), "website_data", "html")
-        self.pkl_dir = os.path.join(os.getcwd(), "website_data", "pkl")
+        self.pkl_dir = os.path.join(os.getcwd(), "website_data", "txt")
         self.mapping_file = "mapping.pkl"
 
         os.makedirs(self.html_dir, exist_ok=True)
