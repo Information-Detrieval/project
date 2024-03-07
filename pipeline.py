@@ -18,21 +18,21 @@ from llama_index.embeddings.openai import OpenAIEmbedding
 from llama_index.llms.openai import OpenAI
 from llama_index.vector_stores.pinecone import PineconeVectorStore
 from pinecone import Pinecone, ServerlessSpec
-
+from scrape import WebScraper
 
 class DataPipeline:
     def __init__(self):
         self.pkl_dir = os.path.join(os.getcwd(), "website_data" , "pkl")
-        self.OPENAI_API_KEY = "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"
+        self.OPENAI_API_KEY = ""
         self.PINECONE_API_KEY = "8a73267f-d64d-4d53-a5ae-0a241afd5517"
         os.environ["OPENAI_API_KEY"] = self.OPENAI_API_KEY
         os.environ["PINECONE_API_KEY"] = self.PINECONE_API_KEY
         self.PERSIST_DIR = os.path.join(os.getcwd(), "storage")
         self.pinecone_index = self.initialize_pinecone()
+        self.websites = websites
 
-    @staticmethod
-    def scrape_websites():
-        pass
+    def scrape_websites(self):
+        return WebScraper(self.websites).scrape_websites()
 
     def initialize_pinecone(self):
         pc = Pinecone(api_key=self.PINECONE_API_KEY)
@@ -96,7 +96,8 @@ class DataPipeline:
 
 
 if __name__ == "__main__":
-    temp = DataPipeline()
+    websites = ["https://www.iiitd.ac.in/dhruv"]
+    temp = DataPipeline(websites)
 
     query_str = "What is solid waste"
     adi = temp.run_query(query_str)
