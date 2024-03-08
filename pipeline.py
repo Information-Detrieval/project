@@ -19,11 +19,12 @@ from llama_index.llms.openai import OpenAI
 from llama_index.vector_stores.pinecone import PineconeVectorStore
 from pinecone import Pinecone, ServerlessSpec
 from scrape import WebScraper
+import pandas as pd
 
 class DataPipeline():
     def __init__(self, websites):
         self.pkl_dir = os.path.join(os.getcwd(), "website_data" , "pkl")
-        self.OPENAI_API_KEY = ""
+        self.OPENAI_API_KEY = "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"
         self.PINECONE_API_KEY = "8a73267f-d64d-4d53-a5ae-0a241afd5517"
         os.environ["OPENAI_API_KEY"] = self.OPENAI_API_KEY
         os.environ["PINECONE_API_KEY"] = self.PINECONE_API_KEY
@@ -44,7 +45,7 @@ class DataPipeline():
                     name=index_name,
                     dimension=1536,
                     metric="cosine",
-                    spec=ServerlessSpec(cloud="gcp", region="us-central1"),
+                    spec=ServerlessSpec(cloud="gcp-starter", region="Iowa (us-central1)"),
                 )
 
             return pc.Index(index_name)
@@ -89,8 +90,8 @@ class DataPipeline():
                 os.path.join(os.getcwd(), "website_data", "txt"),
                 recursive=True,
             ).load_data()
-            with open(os.path.join(os.getcwd(), "website_data", "pkl", "documents.pkl"), "rb") as f:
-                documents = pickle.load(f)
+            with open(os.path.join(os.getcwd(), "website_data", "pkl", "documents.pkl"), "wb") as f:
+                documents = pickle.dump(documents, f)
 
         index = self.initialize_index(documents, vector_store)
         retriever = VectorIndexRetriever(index, similarity_top_k=3)
@@ -98,13 +99,30 @@ class DataPipeline():
         return retrieved_nodes
 
 
+
 if __name__ == "__main__":
     websites = ["https://www.iiitd.ac.in/dhruv"]
+    df = pd.read_csv("QnA.csv")
     temp = DataPipeline(websites)
+    new_rows = []
+    for index, row in df.iterrows():
+        print(index)
+        ground_truth_doc = row['Text File']  
+        query = row['Question']  
+        query_answer = row['Answer']
+        retreived_docs = temp.run_query(query)
+        r_doc1 = retreived_docs[0].metadata['file_path'][50:]
+        r_doc2 = retreived_docs[1].metadata['file_path'][50:]
+        r_doc3 = retreived_docs[2].metadata['file_path'][50:]
 
-    query_str = "What is solid waste"
-    adi = temp.run_query(query_str)
-    print(adi)
+        new_row = [query, ground_truth_doc, r_doc1, r_doc2, r_doc3] 
+        new_rows.append(new_row)
+        # break
+
+    new_df = pd.DataFrame(new_rows, columns=['Question', 'Text_File', 'Retrieved_document_1', 'Retrieved_document_2', 'Retrieved_document_3'])
+    new_df.to_csv("QnR.csv", index=False)
+
+
 
 
 
