@@ -20,8 +20,8 @@ from llama_index.vector_stores.pinecone import PineconeVectorStore
 from pinecone import Pinecone, ServerlessSpec
 from scrape import WebScraper
 
-class DataPipeline:
-    def __init__(self):
+class DataPipeline():
+    def __init__(self, websites):
         self.pkl_dir = os.path.join(os.getcwd(), "website_data" , "pkl")
         self.OPENAI_API_KEY = ""
         self.PINECONE_API_KEY = "8a73267f-d64d-4d53-a5ae-0a241afd5517"
@@ -81,13 +81,16 @@ class DataPipeline:
     def run_query(self, query_str):
         llm = OpenAI(model="gpt-3.5-turbo-0125", api_key=self.OPENAI_API_KEY)
         vector_store = PineconeVectorStore(pinecone_index=self.pinecone_index)
-        documents = SimpleDirectoryReader(
-            os.path.join(os.getcwd(), "website_data", "text"),
-            recursive=True,
-        ).load_data()
-        print("Loading documents...")
-        with open(os.path.join(os.getcwd(), "website_data", "pkl", "documents.pkl"), "wb") as f:
-            pickle.dump(documents, f)
+        if os.path.exists(os.path.join(os.getcwd(), "website_data", "pkl", "documents.pkl")):
+            with open(os.path.join(os.getcwd(), "website_data", "pkl", "documents.pkl"), "rb") as f:
+                documents = pickle.load(f)
+        else:
+            documents = SimpleDirectoryReader(
+                os.path.join(os.getcwd(), "website_data", "txt"),
+                recursive=True,
+            ).load_data()
+            with open(os.path.join(os.getcwd(), "website_data", "pkl", "documents.pkl"), "rb") as f:
+                documents = pickle.load(f)
 
         index = self.initialize_index(documents, vector_store)
         retriever = VectorIndexRetriever(index, similarity_top_k=3)

@@ -120,7 +120,7 @@ if __name__ == "__main__":
     websites = ["https://www.iiitd.ac.in/dhruv", "https://www.iiitd.ac.in/about", "https://iiitd.ac.in/facilities/green_policy"]
     scraper = WebScraper(websites)
     # scraper.scrape_websites()
-    scraper.scraped_sitemap("sitemap(1).xml")
+    scraper.scraped_sitemap("sitemap.xml")
 
     # with open("website_data/pkl/iiitd_ac_in_dhruv.pkl", "rb") as f:
     #     data = pickle.load(f)
