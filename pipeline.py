@@ -19,7 +19,7 @@ from llama_index.llms.openai import OpenAI
 from llama_index.vector_stores.pinecone import PineconeVectorStore
 from pinecone import Pinecone, ServerlessSpec
 from scrape import WebScraper
-import pprint
+import pandas as pd
 
 class DataPipeline():
     def __init__(self, websites):
@@ -99,18 +99,30 @@ class DataPipeline():
         return retrieved_nodes
 
 
+
 if __name__ == "__main__":
     websites = ["https://www.iiitd.ac.in/dhruv"]
+    df = pd.read_csv("QnA.csv")
     temp = DataPipeline(websites)
+    new_rows = []
+    for index, row in df.iterrows():
+        print(index)
+        ground_truth_doc = row['Text File']  
+        query = row['Question']  
+        query_answer = row['Answer']
+        retreived_docs = temp.run_query(query)
+        r_doc1 = retreived_docs[0].metadata['file_path'][50:]
+        r_doc2 = retreived_docs[1].metadata['file_path'][50:]
+        r_doc3 = retreived_docs[2].metadata['file_path'][50:]
 
-    query_str = "What are the dining facilities in IIITD?"
-    adi = temp.run_query(query_str)
-    
-    for i in adi:
-        print(i)
-        print(i.metadata)
-    # print(type(adi[0]))
-    print(len(adi))
+        new_row = [query, ground_truth_doc, r_doc1, r_doc2, r_doc3] 
+        new_rows.append(new_row)
+        # break
+
+    new_df = pd.DataFrame(new_rows, columns=['Question', 'Text_File', 'Retrieved_document_1', 'Retrieved_document_2', 'Retrieved_document_3'])
+    new_df.to_csv("QnR.csv", index=False)
+
+
 
 
 
