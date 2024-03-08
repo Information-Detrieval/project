@@ -110,22 +110,22 @@ if __name__ == "__main__":
     temp.scrape_sitemap("sitemap_taj.xml")
     new_rows = []
 
-    # for index, row in df.iterrows():
-    #     print(index)
-    #     ground_truth_doc = row['Text File']  
-    #     query = row['Question']  
-    #     query_answer = row['Answer']
-    #     retreived_docs = temp.run_query(query)
-    #     r_doc1 = retreived_docs[0].metadata['file_path'][50:]
-    #     r_doc2 = retreived_docs[1].metadata['file_path'][50:]
-    #     r_doc3 = retreived_docs[2].metadata['file_path'][50:]
+    for index, row in df.iterrows():
+        print(index)
+        ground_truth_doc = row['Text File']  
+        query = row['Question']  
+        query_answer = row['Answer']
+        retreived_docs = temp.run_query(query)
+        r_doc1 = retreived_docs[0].metadata['file_path'][50:]
+        r_doc2 = retreived_docs[1].metadata['file_path'][50:]
+        r_doc3 = retreived_docs[2].metadata['file_path'][50:]
 
-    #     new_row = [query, ground_truth_doc, r_doc1, r_doc2, r_doc3] 
-    #     new_rows.append(new_row)
-    #     # break
+        new_row = [query, ground_truth_doc, r_doc1, r_doc2, r_doc3] 
+        new_rows.append(new_row)
+        # break
 
-    # new_df = pd.DataFrame(new_rows, columns=['Question', 'Text_File', 'Retrieved_document_1', 'Retrieved_document_2', 'Retrieved_document_3'])
-    # new_df.to_csv("QnR.csv", index=False)
+    new_df = pd.DataFrame(new_rows, columns=['Question', 'Text_File', 'Retrieved_document_1', 'Retrieved_document_2', 'Retrieved_document_3'])
+    new_df.to_csv("QnR.csv", index=False)
 
 
 
