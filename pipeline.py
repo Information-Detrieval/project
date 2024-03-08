@@ -25,7 +25,7 @@ class DataPipeline():
     def __init__(self, websites):
         self.pkl_dir = os.path.join(os.getcwd(), "website_data" , "pkl")
         self.OPENAI_API_KEY = "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"
-        self.PINECONE_API_KEY = "3f684ac9-1969-465f-9cb9-670f0abf84f3"
+        self.PINECONE_API_KEY = "8a73267f-d64d-4d53-a5ae-0a241afd5517"
         os.environ["OPENAI_API_KEY"] = self.OPENAI_API_KEY
         os.environ["PINECONE_API_KEY"] = self.PINECONE_API_KEY
         self.PERSIST_DIR = os.path.join(os.getcwd(), "storage")
