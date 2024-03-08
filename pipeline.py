@@ -103,11 +103,13 @@ if __name__ == "__main__":
     websites = ["https://www.iiitd.ac.in/dhruv"]
     temp = DataPipeline(websites)
 
-    query_str = "What is placement office ?"
+    query_str = "What are the dining facilities in IIITD?"
     adi = temp.run_query(query_str)
+    
     for i in adi:
+        print(i)
         print(i.metadata)
-    print(type(adi[0]))
+    # print(type(adi[0]))
     print(len(adi))
 
 
