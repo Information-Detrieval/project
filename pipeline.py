@@ -19,11 +19,12 @@ from llama_index.llms.openai import OpenAI
 from llama_index.vector_stores.pinecone import PineconeVectorStore
 from pinecone import Pinecone, ServerlessSpec
 from scrape import WebScraper
+import pprint
 
 class DataPipeline():
     def __init__(self, websites):
         self.pkl_dir = os.path.join(os.getcwd(), "website_data" , "pkl")
-        self.OPENAI_API_KEY = ""
+        self.OPENAI_API_KEY = "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"
         self.PINECONE_API_KEY = "8a73267f-d64d-4d53-a5ae-0a241afd5517"
         os.environ["OPENAI_API_KEY"] = self.OPENAI_API_KEY
         os.environ["PINECONE_API_KEY"] = self.PINECONE_API_KEY
@@ -89,8 +90,8 @@ class DataPipeline():
                 os.path.join(os.getcwd(), "website_data", "txt"),
                 recursive=True,
             ).load_data()
-            with open(os.path.join(os.getcwd(), "website_data", "pkl", "documents.pkl"), "rb") as f:
-                documents = pickle.load(f)
+            with open(os.path.join(os.getcwd(), "website_data", "pkl", "documents.pkl"), "wb") as f:
+                documents = pickle.dump(documents, f)
 
         index = self.initialize_index(documents, vector_store)
         retriever = VectorIndexRetriever(index, similarity_top_k=3)
@@ -102,9 +103,12 @@ if __name__ == "__main__":
     websites = ["https://www.iiitd.ac.in/dhruv"]
     temp = DataPipeline(websites)
 
-    query_str = "What is solid waste"
+    query_str = "What is placement office ?"
     adi = temp.run_query(query_str)
-    print(adi)
+    for i in adi:
+        print(i.metadata)
+    print(type(adi[0]))
+    print(len(adi))
 
 
 
