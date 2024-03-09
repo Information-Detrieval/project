@@ -25,7 +25,7 @@ class DataPipeline():
     def __init__(self):
         self.pkl_dir = os.path.join(os.getcwd(), "website_data" , "pkl")
         self.OPENAI_API_KEY = "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"
-        self.PINECONE_API_KEY = "8a73267f-d64d-4d53-a5ae-0a241afd5517"
+        self.PINECONE_API_KEY = "3f684ac9-1969-465f-9cb9-670f0abf84f3"
         os.environ["OPENAI_API_KEY"] = self.OPENAI_API_KEY
         os.environ["PINECONE_API_KEY"] = self.PINECONE_API_KEY
         self.PERSIST_DIR = os.path.join(os.getcwd(), "storage")
@@ -41,7 +41,7 @@ class DataPipeline():
     def initialize_pinecone(self):
         pc = Pinecone(api_key=self.PINECONE_API_KEY)
         try:
-            index_name = "detrieval"
+            index_name = "nalish"
 
             if index_name not in pc.list_indexes().names():
                 pc.create_index(
@@ -105,9 +105,9 @@ class DataPipeline():
 
 if __name__ == "__main__":
     websites = ["https://www.iiitd.ac.in/dhruv"]
-    df = pd.read_csv("QnA.csv")
+    df = pd.read_csv("QnA-Website2.csv")
     temp = DataPipeline()
-    temp.scrape_sitemap("sitemap_taj.xml")
+    # temp.scrape_sitemap("sitemap_taj.xml")
     new_rows = []
 
     for index, row in df.iterrows():
@@ -116,16 +116,16 @@ if __name__ == "__main__":
         query = row['Question']  
         query_answer = row['Answer']
         retreived_docs = temp.run_query(query)
-        r_doc1 = retreived_docs[0].metadata['file_path'][50:]
-        r_doc2 = retreived_docs[1].metadata['file_path'][50:]
-        r_doc3 = retreived_docs[2].metadata['file_path'][50:]
+        r_doc1 = retreived_docs[0].metadata['file_path'][57:]
+        r_doc2 = retreived_docs[1].metadata['file_path'][57:]
+        r_doc3 = retreived_docs[2].metadata['file_path'][57:]
 
         new_row = [query, ground_truth_doc, r_doc1, r_doc2, r_doc3] 
         new_rows.append(new_row)
         # break
 
     new_df = pd.DataFrame(new_rows, columns=['Question', 'Text_File', 'Retrieved_document_1', 'Retrieved_document_2', 'Retrieved_document_3'])
-    new_df.to_csv("QnR.csv", index=False)
+    new_df.to_csv("QnR-Taj.csv", index=False)
 
 
 
