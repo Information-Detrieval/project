@@ -1,0 +1,46 @@
+Guest House | IIIT-Delhi
+Guest House
+S.NO.
+Type of Guest House
+Nos.
+1
+Suite Rooms
+2
+2
+Deluxe Rooms
+14
+Category of Visitors 
+For Visitors coming to IIIT-Delhi for official work
+For Govt officials coming on duty not IIIT-Delhi work
+For other Visitors including parents
+Guest room rates are as follows 
+S.NO.
+Type of Guest House
+Nos.
+Rates (Rs.)
+1
+Suite Room
+2
+3200+ 18% GST
+2
+Deluxe Room
+14
+2000+18% GST
+3
+Extra Bedding Charges
+ 
+200+18% GST
+Payment Link
+Rates for meals are as follows 
+S.NO.
+Meals
+Rates
+1
+Breakfast
+100/-
+2
+Lunch
+150/-
+3
+Dinner
+150/-
