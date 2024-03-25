@@ -1,4 +1,5 @@
 import re
+from lxml import etree
 
 import requests
 import pickle
@@ -40,6 +41,7 @@ class WebScraper:
                 r = requests.get(website)
                 soup = BeautifulSoup(r.text, 'html.parser')
                 data = soup.get_text()
+                dom = etree.HTML(str(soup))
 
                 filename = self._get_filename(website)
                 html_filepath = os.path.join(self.html_dir, f"{filename}.html")
@@ -47,10 +49,13 @@ class WebScraper:
 
                 # self._write_to_file(pkl_filepath+".txt", data)
                 # remove repeated blank lines, but retain single new lines
-                data = re.sub('\n{2,}', '\n', data)
+                txt = re.sub('\n{2,}', '\n', data)
+                if website.startswith("https://www.latestlaws.com"):
+                    x_path = '//*[@id="content-area"]/div/div/div[2]/div[2]/div[1]/div[3]/p'
+                    txt = dom.xpath(x_path)[0].text
 
                 self._write_to_file(html_filepath, r.text)
-                self._write_to_file(pkl_filepath, data)
+                self._write_to_file(pkl_filepath, txt)
 
                 mapping[website] = f"{filename}.pkl"
 
@@ -117,10 +122,10 @@ class WebScraper:
 
 
 if __name__ == "__main__":
-    websites = ["https://www.iiitd.ac.in/dhruv", "https://www.iiitd.ac.in/about", "https://iiitd.ac.in/facilities/green_policy"]
+    websites = ["https://www.latestlaws.com/bare-acts/central-acts-rules/ipc-section-170-personating-a-public-servant/"]
     scraper = WebScraper(websites)
-    # scraper.scrape_websites()
-    scraper.scraped_sitemap("sitemap.xml")
+    scraper.scrape_websites()
+    # scraper.scraped_sitemap("sitemap.xml")
 
     # with open("website_data/pkl/iiitd_ac_in_dhruv.pkl", "rb") as f:
     #     data = pickle.load(f)

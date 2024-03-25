@@ -3,3 +3,7 @@ pinecone-client
 beautifulsoup4~=4.12.3
 llama-index-vector-stores-pinecone==0.1.4
 llama_index
+
+lxml~=5.1.0
+bs4~=0.0.2
+pandas~=2.2.1
