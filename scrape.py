@@ -1,5 +1,6 @@
 import re
 from lxml import etree
+from lxml import html
 
 import requests
 import pickle
@@ -16,6 +17,11 @@ from llama_index.core import (
 import xml.etree.ElementTree as ET
 
 
+def find_by_xpath(element_source, xpath_expression):
+    root = html.fromstring(element_source)
+    return root.xpath(xpath_expression)
+
+
 class WebScraper:
     def __init__(self, websites):
         self.websites = websites
@@ -30,7 +36,7 @@ class WebScraper:
         return website.split("://")[1].replace("/", "_")
 
     def _write_to_file(self, filepath, content):
-        with open(filepath,  "w", encoding="utf-8") as f:
+        with open(filepath, "w", encoding="utf-8") as f:
             f.write(content)
 
     def scrape_websites(self):
@@ -39,10 +45,15 @@ class WebScraper:
             print(f"Scraping {website}...")
             try:
                 r = requests.get(website)
-                soup = BeautifulSoup(r.text, 'html.parser')
-                data = soup.get_text()
-                dom = etree.HTML(str(soup))
+                raw_html = r.text
 
+                soup = BeautifulSoup(raw_html, 'html.parser')
+                # dom = etree.HTML(str(soup))
+                if website.startswith("https://www.latestlaws.com"):
+                    selector = "#content-area > div > div > div.col-md-6.order-1.order-sm-1.order-md-2 > div:nth-child(4) > div:nth-child(1) > div.page-content.actdetail.act-single-page"
+                    soup = soup.select(selector)[0]
+
+                data = soup.get_text()
                 filename = self._get_filename(website)
                 html_filepath = os.path.join(self.html_dir, f"{filename}.html")
                 pkl_filepath = os.path.join(self.pkl_dir, f"{filename}.txt")
@@ -50,9 +61,6 @@ class WebScraper:
                 # self._write_to_file(pkl_filepath+".txt", data)
                 # remove repeated blank lines, but retain single new lines
                 txt = re.sub('\n{2,}', '\n', data)
-                if website.startswith("https://www.latestlaws.com"):
-                    x_path = '//*[@id="content-area"]/div/div/div[2]/div[2]/div[1]/div[3]/p'
-                    txt = dom.xpath(x_path)[0].text
 
                 self._write_to_file(html_filepath, r.text)
                 self._write_to_file(pkl_filepath, txt)
@@ -66,7 +74,6 @@ class WebScraper:
         #     pickle.dump(mapping, f)
 
         return self.html_dir, self.pkl_dir
-
 
     def get_html(self, website):
         filename = self._get_filename(website)
@@ -119,10 +126,9 @@ class WebScraper:
             print(f"Sitemap file not found: {sitemap_file}")
 
 
-
-
 if __name__ == "__main__":
-    websites = ["https://www.latestlaws.com/bare-acts/central-acts-rules/ipc-section-170-personating-a-public-servant/"]
+    websites = [
+        "https://www.latestlaws.com/bare-acts/central-acts-rules/ipc-section-166a-punishment-for-non-recording-of-information-/"]
     scraper = WebScraper(websites)
     scraper.scrape_websites()
     # scraper.scraped_sitemap("sitemap.xml")
