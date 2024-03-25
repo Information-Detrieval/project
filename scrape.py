@@ -1,6 +1,4 @@
 import re
-from lxml import etree
-from lxml import html
 
 import requests
 import pickle
@@ -48,7 +46,6 @@ class WebScraper:
                 raw_html = r.text
 
                 soup = BeautifulSoup(raw_html, 'html.parser')
-                # dom = etree.HTML(str(soup))
                 if website.startswith("https://www.latestlaws.com"):
                     selector = "#content-area > div > div > div.col-md-6.order-1.order-sm-1.order-md-2 > div:nth-child(4) > div:nth-child(1) > div.page-content.actdetail.act-single-page"
                     soup = soup.select(selector)[0]
@@ -128,7 +125,10 @@ class WebScraper:
 
 if __name__ == "__main__":
     websites = [
-        "https://www.latestlaws.com/bare-acts/central-acts-rules/ipc-section-166a-punishment-for-non-recording-of-information-/"]
+        "https://www.latestlaws.com/bare-acts/central-acts-rules/ipc-section-166a-punishment-for-non-recording-of-information-/",
+        "https://www.latestlaws.com/bare-acts/central-acts-rules/ipc-section-169-public-servant-unlawfully-buying-or-bidding-for-property/",
+        "https://www.latestlaws.com/bare-acts/central-acts-rules/ipc-section-167-public-servant-farming-an-incorrect-document-with-intent-to-cause-injury/",
+    ]
     scraper = WebScraper(websites)
     scraper.scrape_websites()
     # scraper.scraped_sitemap("sitemap.xml")
