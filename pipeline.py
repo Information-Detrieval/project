@@ -21,14 +21,16 @@ from pinecone import Pinecone, ServerlessSpec
 from scrape import WebScraper
 import pandas as pd
 
+path = os.getcwd()
+
 class DataPipeline():
     def __init__(self):
-        self.pkl_dir = os.path.join(os.getcwd(), "website_data" , "pkl")
+        self.pkl_dir = os.path.join(path, "website_data" , "pkl")
         self.OPENAI_API_KEY = "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"
         self.PINECONE_API_KEY = "3f684ac9-1969-465f-9cb9-670f0abf84f3"
         os.environ["OPENAI_API_KEY"] = self.OPENAI_API_KEY
         os.environ["PINECONE_API_KEY"] = self.PINECONE_API_KEY
-        self.PERSIST_DIR = os.path.join(os.getcwd(), "storage")
+        self.PERSIST_DIR = os.path.join(path, "storage")
         self.pinecone_index = self.initialize_pinecone()
         self.websites = ""
 
@@ -85,15 +87,15 @@ class DataPipeline():
     def run_query(self, query_str):
         llm = OpenAI(model="gpt-3.5-turbo-0125", api_key=self.OPENAI_API_KEY)
         vector_store = PineconeVectorStore(pinecone_index=self.pinecone_index)
-        if os.path.exists(os.path.join(os.getcwd(), "website_data", "pkl", "documents.pkl")):
-            with open(os.path.join(os.getcwd(), "website_data", "pkl", "documents.pkl"), "rb") as f:
+        if os.path.exists(os.path.join(path, "website_data", "pkl", "documents.pkl")):
+            with open(os.path.join(path, "website_data", "pkl", "documents.pkl"), "rb") as f:
                 documents = pickle.load(f)
         else:
             documents = SimpleDirectoryReader(
-                os.path.join(os.getcwd(), "website_data", "txt"),
+                os.path.join(path, "website_data", "txt"),
                 recursive=True,
             ).load_data()
-            with open(os.path.join(os.getcwd(), "website_data", "pkl", "documents.pkl"), "wb") as f:
+            with open(os.path.join(path, "website_data", "pkl", "documents.pkl"), "wb") as f:
                 documents = pickle.dump(documents, f)
 
         index = self.initialize_index(documents, vector_store)
@@ -107,25 +109,25 @@ if __name__ == "__main__":
     websites = ["https://www.iiitd.ac.in/dhruv"]
     df = pd.read_csv("QnA-Website2.csv")
     temp = DataPipeline()
-    # temp.scrape_sitemap("sitemap_taj.xml")
-    new_rows = []
+    temp.scrape_sitemap("law.xml")
+    # new_rows = []
 
-    for index, row in df.iterrows():
-        print(index)
-        ground_truth_doc = row['Text File']  
-        query = row['Question']  
-        query_answer = row['Answer']
-        retreived_docs = temp.run_query(query)
-        r_doc1 = retreived_docs[0].metadata['file_path'][57:]
-        r_doc2 = retreived_docs[1].metadata['file_path'][57:]
-        r_doc3 = retreived_docs[2].metadata['file_path'][57:]
+    # for index, row in df.iterrows():
+    #     print(index)
+    #     ground_truth_doc = row['Text File']  
+    #     query = row['Question']  
+    #     query_answer = row['Answer']
+    #     retreived_docs = temp.run_query(query)
+    #     r_doc1 = retreived_docs[0].metadata['file_path'][57:]
+    #     r_doc2 = retreived_docs[1].metadata['file_path'][57:]
+    #     r_doc3 = retreived_docs[2].metadata['file_path'][57:]
 
-        new_row = [query, ground_truth_doc, r_doc1, r_doc2, r_doc3] 
-        new_rows.append(new_row)
-        # break
+    #     new_row = [query, ground_truth_doc, r_doc1, r_doc2, r_doc3] 
+    #     new_rows.append(new_row)
+    #     # break
 
-    new_df = pd.DataFrame(new_rows, columns=['Question', 'Text_File', 'Retrieved_document_1', 'Retrieved_document_2', 'Retrieved_document_3'])
-    new_df.to_csv("QnR-Taj.csv", index=False)
+    # new_df = pd.DataFrame(new_rows, columns=['Question', 'Text_File', 'Retrieved_document_1', 'Retrieved_document_2', 'Retrieved_document_3'])
+    # new_df.to_csv("QnR-Taj.csv", index=False)
 
 
 
