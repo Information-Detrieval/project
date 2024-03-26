@@ -1,0 +1,39 @@
+
+Category of Bare Act
+Name of the Act
+Year of Promulgation
+Criminal Laws
+Indian Penal Code
+1860
+Act Number
+Enactment Date
+Chapter Number
+45
+06.10.1860
+8
+Chapter Title
+Sub-Chapter
+Legislated by
+Of Offence Against The Public Tranquillity
+-
+Parliament of India
+p>Whoever hires or engages, or employs, or promotes, or connives at the hiring, engagement or employment of any person to join or become a member of any unlawful assembly, shall be punishable as a member of such unlawful assembly, and for any offence which may be committed by any such person as a member of such unlawful assembly in pursuance of such hiring, engagement or employment, in the same manner as if he had been a member of such unlawful assembly, or himself had committed such offence.
+ 
+Offence Description
+Punishment provided
+Cognizable/Non-Cognizable
+Hiring, engaging or employing persons to take part in an unlawful assembly.
+The same as for a member of such assembly, and for any offence committed by any member of such assembly.
+Cognisable
+Bailable/Non-Bailable
+Trial Court Details
+Compoundable/Non-Compoundable
+According as offence is bailable or non-bailable
+Court by which the offence is triable
+Non-Compoundable
+Compoundable by Whom
+Concerned Ministry
+Concerned Department
+Non-Compoundable
+Ministry of Home Affairs
+Department of Internal Security
