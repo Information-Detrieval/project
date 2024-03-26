@@ -1,0 +1,38 @@
+
+Category of Bare Act
+Name of the Act
+Year of Promulgation
+Criminal Laws
+Indian Penal Code
+1860
+Act Number
+Enactment Date
+Chapter Number
+45
+06.10.1860
+8
+Chapter Title
+Sub-Chapter
+Legislated by
+Of Offence Against The Public Tranquillity
+-
+Parliament of India
+Whoever knowingly joins or continues in any assembly of five or more persons likely to cause a disturbance of the public peace, after such assembly has been lawfully commanded to disperse, shall be punished with imprisonment of either description for a term which may extend to six months, or with fine, or with both.
+Offence Description
+Punishment provided
+Cognizable/Non-Cognizable
+Knowingly joining or continuing in any assembly of five or more persons after it has been commanded to disperse.
+Imprisonment for 6 months, or fine, or both.
+Bailable
+Bailable/Non-Bailable
+Trial Court Details
+Compoundable/Non-Compoundable
+Bailable
+Any Magistrate
+Non-Compoundable
+Compoundable by Whom
+Concerned Ministry
+Concerned Department
+Non-Compoundable
+Ministry of Home Affairs
+Department of Internal Security

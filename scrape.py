@@ -1,3 +1,4 @@
+import json
 import re
 
 import requests
@@ -25,10 +26,12 @@ class WebScraper:
         self.websites = websites
         self.html_dir = os.path.join(os.getcwd(), "website_data", "html")
         self.pkl_dir = os.path.join(os.getcwd(), "website_data", "txt")
+        self.json_dir = os.path.join(os.getcwd(), "website_data", "json")
         self.mapping_file = "mapping.pkl"
 
         os.makedirs(self.html_dir, exist_ok=True)
         os.makedirs(self.pkl_dir, exist_ok=True)
+        os.makedirs(self.json_dir, exist_ok=True)
 
     def _get_filename(self, website):
         return website.split("://")[1].replace("/", "_")
@@ -46,6 +49,7 @@ class WebScraper:
                 raw_html = r.text
 
                 soup = BeautifulSoup(raw_html, 'html.parser')
+                title = soup.title.string
                 if website.startswith("https://www.latestlaws.com"):
                     selector = "#content-area > div > div > div.col-md-6.order-1.order-sm-1.order-md-2 > div:nth-child(4) > div:nth-child(1) > div.page-content.actdetail.act-single-page"
                     soup = soup.select(selector)[0]
@@ -54,6 +58,7 @@ class WebScraper:
                 filename = self._get_filename(website)
                 html_filepath = os.path.join(self.html_dir, f"{filename}.html")
                 pkl_filepath = os.path.join(self.pkl_dir, f"{filename}.txt")
+                json_filepath = os.path.join(self.json_dir, f"{filename}.json")
 
                 # self._write_to_file(pkl_filepath+".txt", data)
                 # remove repeated blank lines, but retain single new lines
@@ -61,6 +66,11 @@ class WebScraper:
 
                 self._write_to_file(html_filepath, r.text)
                 self._write_to_file(pkl_filepath, txt)
+                self._write_to_file(json_filepath, json.dumps({
+                    "title": title,
+                    "url": website,
+                    "text": txt
+                }, indent=4))
 
                 mapping[website] = f"{filename}.pkl"
 
@@ -128,6 +138,28 @@ if __name__ == "__main__":
         "https://www.latestlaws.com/bare-acts/central-acts-rules/ipc-section-166a-punishment-for-non-recording-of-information-/",
         "https://www.latestlaws.com/bare-acts/central-acts-rules/ipc-section-169-public-servant-unlawfully-buying-or-bidding-for-property/",
         "https://www.latestlaws.com/bare-acts/central-acts-rules/ipc-section-167-public-servant-farming-an-incorrect-document-with-intent-to-cause-injury/",
+        "https://www.latestlaws.com/bare-acts/central-acts-rules/ipc-section-131-abetting-mutiny-or-attempting-to-seduce-a-soldier-sailor-or-airman-from-his-duty/",
+        "https://www.latestlaws.com/bare-acts/central-acts-rules/ipc-section-132-abetment-of-mutiny-if-mutiny-is-committed-in-consequence-thereof/",
+        "https://www.latestlaws.com/bare-acts/central-acts-rules/ipc-section-133-abetment-of-assault-by-soldier-sailor-or-airman-on-his-superior-officer-when-in-execution-of-his-office/",
+        "https://www.latestlaws.com/bare-acts/central-acts-rules/ipc-section-134-abetment-of-such-assault-if-the-assault-is-committed/",
+        "https://www.latestlaws.com/bare-acts/central-acts-rules/ipc-section-135-abetment-of-desertion-of-soldier-sailor-or-airman/",
+        "https://www.latestlaws.com/bare-acts/central-acts-rules/ipc-section-136-harbouring-deserter/",
+        "https://www.latestlaws.com/bare-acts/central-acts-rules/ipc-section-137-deserter-concealed-on-board-merchant-vessel-through-negligence-of-master/",
+        "https://www.latestlaws.com/bare-acts/central-acts-rules/ipc-section-138-abetment-of-act-of-insubordination-by-soldier-sailor-or-airman/",
+        "https://www.latestlaws.com/bare-acts/central-acts-rules/ipc-section-139-persons-subject-to-certain-acts/",
+        "https://www.latestlaws.com/bare-acts/central-acts-rules/ipc-section-140-wearing-garb-or-carrying-token-used-by-soldier-sailor-or-airman/",
+        "https://www.latestlaws.com/bare-acts/central-acts-rules/ipc-section-141-unlawful-assembly/",
+        "https://www.latestlaws.com/bare-acts/central-acts-rules/ipc-section-142-being-member-of-unlawful-assembly/",
+        "https://www.latestlaws.com/bare-acts/central-acts-rules/ipc-section-143-punishment/",
+        "https://www.latestlaws.com/bare-acts/central-acts-rules/ipc-section-144-joining-unlawful-assembly-armed-with-deadly-weapon/",
+        "https://www.latestlaws.com/bare-acts/central-acts-rules/ipc-section-145-joining-or-continuing-in-unlawful-assembly-knowing-it-has-been-commanded-to-disperse/",
+        "https://www.latestlaws.com/bare-acts/central-acts-rules/ipc-section-146-rioting/",
+        "https://www.latestlaws.com/bare-acts/central-acts-rules/ipc-section-147-punishment-for-rioting/",
+        "https://www.latestlaws.com/bare-acts/central-acts-rules/ipc-section-148-rioting-armed-with-deadly-weapon/",
+        "https://www.latestlaws.com/bare-acts/central-acts-rules/ipc-section-149-every-member-of-unlawful-assembly-guilty-of-offence-committed-in-prosecution-of-common-object/",
+        "https://www.latestlaws.com/bare-acts/central-acts-rules/ipc-section-150-hiring-or-conniving-at-hiring-of-persons-to-join-unlawful-assembly/",
+        "https://www.latestlaws.com/bare-acts/central-acts-rules/ipc-section-151-knowingly-joining-or-continuing-in-assembly-of-five-or-more-persons-after-it-has-been-commanded-to-disperse/",
+        "https://www.latestlaws.com/bare-acts/central-acts-rules/ipc-section-152-assaulting-or-obstructing-public-servant-when-suppressing-riot-etc-/",
     ]
     scraper = WebScraper(websites)
     scraper.scrape_websites()
