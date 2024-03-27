@@ -84,6 +84,11 @@ class DataPipeline():
             index.storage_context.persist(persist_dir=self.PERSIST_DIR)
             return index
 
+    def get_meta(self, file_path):
+        with open(file_path, "rb") as f:
+            metadata = pickle.load(f)
+        return {"title": metadata["title"], "url": metadata["url"]}
+
     def run_query(self, query_str):
         llm = OpenAI(model="gpt-3.5-turbo-0125", api_key=self.OPENAI_API_KEY)
         vector_store = PineconeVectorStore(pinecone_index=self.pinecone_index)
@@ -93,10 +98,18 @@ class DataPipeline():
         else:
             documents = SimpleDirectoryReader(
                 os.path.join(path, "website_data", "json"),
+                file_metadata=self.get_meta(os.path.join(path, "website_data", "json")),
                 recursive=True,
             ).load_data()
             with open(os.path.join(path, "website_data", "pkl", "documents.pkl"), "wb") as f:
-                documents = pickle.dump(documents, f)
+                pickle.dump(documents, f)
+
+        # Generate vectors for each document and add them to Pinecone along with metadata
+        for doc in documents:
+            text = doc.get("text", "")
+            metadata = {"title": doc["title"], "url": doc["url"]}
+            vector = llm.generate_vecs(text)
+            vector_store.upsert(items=[vector], ids=[doc["url"]], metadata=[metadata])
 
         index = self.initialize_index(documents, vector_store)
         retriever = VectorIndexRetriever(index, similarity_top_k=3)
@@ -115,15 +128,15 @@ if __name__ == "__main__":
 
     # for index, row in df.iterrows():
     #     print(index)
-    #     ground_truth_doc = row['Text File']  
-    #     query = row['Question']  
+    #     ground_truth_doc = row['Text File']
+    #     query = row['Question']
     #     query_answer = row['Answer']
     #     retreived_docs = temp.run_query(query)
     #     r_doc1 = retreived_docs[0].metadata['file_path'][57:]
     #     r_doc2 = retreived_docs[1].metadata['file_path'][57:]
     #     r_doc3 = retreived_docs[2].metadata['file_path'][57:]
 
-    #     new_row = [query, ground_truth_doc, r_doc1, r_doc2, r_doc3] 
+    #     new_row = [query, ground_truth_doc, r_doc1, r_doc2, r_doc3]
     #     new_rows.append(new_row)
     #     # break
 
