@@ -27,7 +27,7 @@ class DataPipeline():
     def __init__(self):
         self.pkl_dir = os.path.join(path, "website_data" , "pkl")
         self.OPENAI_API_KEY = "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"
-        self.PINECONE_API_KEY = "3f684ac9-1969-465f-9cb9-670f0abf84f3"
+        self.PINECONE_API_KEY = "8a73267f-d64d-4d53-a5ae-0a241afd5517"
         os.environ["OPENAI_API_KEY"] = self.OPENAI_API_KEY
         os.environ["PINECONE_API_KEY"] = self.PINECONE_API_KEY
         self.PERSIST_DIR = os.path.join(path, "storage")
@@ -43,7 +43,7 @@ class DataPipeline():
     def initialize_pinecone(self):
         pc = Pinecone(api_key=self.PINECONE_API_KEY)
         try:
-            index_name = "nalish"
+            index_name = "detrieval"
 
             if index_name not in pc.list_indexes().names():
                 pc.create_index(
@@ -92,7 +92,7 @@ class DataPipeline():
                 documents = pickle.load(f)
         else:
             documents = SimpleDirectoryReader(
-                os.path.join(path, "website_data", "txt"),
+                os.path.join(path, "website_data", "json"),
                 recursive=True,
             ).load_data()
             with open(os.path.join(path, "website_data", "pkl", "documents.pkl"), "wb") as f:
@@ -109,7 +109,8 @@ if __name__ == "__main__":
     websites = ["https://www.iiitd.ac.in/dhruv"]
     df = pd.read_csv("QnA-Website2.csv")
     temp = DataPipeline()
-    temp.scrape_sitemap("law.xml")
+    # temp.scrape_sitemap("law.xml")
+    print(temp.run_query("What is the capital of India?"))
     # new_rows = []
 
     # for index, row in df.iterrows():
