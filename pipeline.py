@@ -110,7 +110,7 @@ if __name__ == "__main__":
     df = pd.read_csv("QnA-Website2.csv")
     temp = DataPipeline()
     # temp.scrape_sitemap("law.xml")
-    print(temp.run_query("What is the capital of India?"))
+    temp.run_query("What is the capital of India?")
     # new_rows = []
 
     # for index, row in df.iterrows():
