@@ -133,7 +133,7 @@ if __name__ == "__main__":
     df = pd.read_csv("Combined-QnA.csv")
     temp = DataPipeline()
     # temp.scrape_sitemap("law.xml")
-    print(len(temp.run_query("What is the punishment for a public servant unlawfully buying or bidding for property under Section 169 of the IPC?")))
+    print(temp.run_query("What is the punishment for a public servant unlawfully buying or bidding for property under Section 169 of the IPC?"))
     new_rows = []
 
     # for index, row in df.iterrows():
