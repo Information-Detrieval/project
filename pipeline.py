@@ -109,7 +109,12 @@ class DataPipeline():
             text = doc.get("text", "")
             metadata = {"title": doc["title"], "url": doc["url"]}
             vector = llm.generate_vecs(text)
-            vector_store.upsert(items=[vector], ids=[doc["url"]], metadata=[metadata])
+            # vector_store.upsert(items=[vector], ids=[doc["url"]], metadata=[metadata])
+            self.pinecone_index.upsert(vectors=[{
+                "id": doc["url"],
+                "values": vector,
+                "metadata": metadata
+            }])
 
         index = self.initialize_index(documents, vector_store)
         retriever = VectorIndexRetriever(index, similarity_top_k=3)
