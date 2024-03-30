@@ -1,6 +1,8 @@
 import json
 import re
+import ssl
 
+import nltk
 import requests
 import pickle
 from bs4 import BeautifulSoup
@@ -15,10 +17,39 @@ from llama_index.core import (
 )
 import xml.etree.ElementTree as ET
 
+from nltk import word_tokenize, PorterStemmer, WordNetLemmatizer
+from nltk.corpus import stopwords
 
-def find_by_xpath(element_source, xpath_expression):
-    root = html.fromstring(element_source)
-    return root.xpath(xpath_expression)
+
+def preprocess_text(text: str) -> str:
+    text = text.lower()
+
+    tokens = word_tokenize(text)
+
+    # NOTE: Assuming all non-alphanumeric characters are punctuation
+    tokens = [word for word in tokens if word.isalnum()]
+
+    stop_words = set(stopwords.words('english'))
+    tokens = [word for word in tokens if word not in stop_words]
+
+    stemmer = PorterStemmer()
+    tokens = [stemmer.stem(word) for word in tokens]
+
+    lemmatizer = WordNetLemmatizer()
+    tokens = [lemmatizer.lemmatize(word) for word in tokens]
+
+    return " ".join(tokens)
+
+
+# NLTK MacOS SSL error fix
+try:
+    _create_unverified_https_context = ssl._create_unverified_context
+except AttributeError:
+    pass
+else:
+    ssl._create_default_https_context = _create_unverified_https_context
+
+nltk.download('wordnet')
 
 
 class WebScraper:
@@ -49,7 +80,8 @@ class WebScraper:
                 raw_html = r.text
 
                 soup = BeautifulSoup(raw_html, 'html.parser')
-                title = soup.title.string
+                title = preprocess_text(soup.title.string)
+
                 if website.startswith("https://www.latestlaws.com"):
                     selector = "#content-area > div > div > div.col-md-6.order-1.order-sm-1.order-md-2 > div:nth-child(4) > div:nth-child(1) > div.page-content.actdetail.act-single-page"
                     soup = soup.select(selector)[0]
