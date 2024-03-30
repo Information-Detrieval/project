@@ -3,6 +3,7 @@ import os.path
 import os
 import pickle
 import time
+import json
 from llama_index.core import (
     VectorStoreIndex,
     SimpleDirectoryReader,
@@ -83,13 +84,15 @@ class DataPipeline():
             index = VectorStoreIndex.from_vector_store(vector_store)
             index.storage_context.persist(persist_dir=self.PERSIST_DIR)
             return index
-
-    def get_meta(self, file_path):
-        with open(file_path, "rb") as f:
-            metadata = pickle.load(f)
-        return {"title": metadata["title"], "url": metadata["url"]}
+    
 
     def run_query(self, query_str):
+        def extract_metadata(filename):
+            with open(os.path.join(path, "website_data", "json", filename), "r") as f:
+                metadata = json.load(f)
+            return {"title": metadata.get("title", ""), "url": metadata.get("url", "")}
+        
+        filename_fn = extract_metadata
         llm = OpenAI(model="gpt-3.5-turbo-0125", api_key=self.OPENAI_API_KEY)
         vector_store = PineconeVectorStore(pinecone_index=self.pinecone_index)
         if os.path.exists(os.path.join(path, "website_data", "pkl", "documents.pkl")):
@@ -98,23 +101,24 @@ class DataPipeline():
         else:
             documents = SimpleDirectoryReader(
                 os.path.join(path, "website_data", "json"),
-                file_metadata=self.get_meta(os.path.join(path, "website_data", "json")),
+                file_metadata=filename_fn,
                 recursive=True,
             ).load_data()
             with open(os.path.join(path, "website_data", "pkl", "documents.pkl"), "wb") as f:
                 pickle.dump(documents, f)
 
-        # Generate vectors for each document and add them to Pinecone along with metadata
-        for doc in documents:
-            text = doc.get("text", "")
-            metadata = {"title": doc["title"], "url": doc["url"]}
-            vector = llm.generate_vecs(text)
-            # vector_store.upsert(items=[vector], ids=[doc["url"]], metadata=[metadata])
-            self.pinecone_index.upsert(vectors=[{
-                "id": doc["url"],
-                "values": vector,
-                "metadata": metadata
-            }])
+        # # Generate vectors for each document and add them to Pinecone along with metadata
+        # for doc in documents:
+        #     print(doc)
+        #     text = doc.get("text", "")
+        #     metadata = {"title": doc["title"], "url": doc["url"]}
+        #     vector = llm.generate_vecs(text)
+        #     # vector_store.upsert(items=[vector], ids=[doc["url"]], metadata=[metadata])
+        #     self.pinecone_index.upsert(vectors=[{
+        #         "id": doc["url"],
+        #         "values": vector,
+        #         "metadata": metadata
+        #     }])
 
         index = self.initialize_index(documents, vector_store)
         retriever = VectorIndexRetriever(index, similarity_top_k=3)
