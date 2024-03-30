@@ -1,0 +1,38 @@
+
+Category of Bare Act
+Name of the Act
+Year of Promulgation
+Criminal Laws
+Indian Penal Code
+1860
+Act Number
+Enactment Date
+Chapter Number
+45
+06.10.1860
+8
+Chapter Title
+Sub-Chapter
+Legislated by
+Of Offence Against The Public Tranquillity
+-
+Parliament of India
+If an offence is committed by any member of an unlawful assembly in prosecution of the common object of that assembly, or such as the members or that assembly knew to be likely to be committed in prosecution of that object, every person who, at the time of the committing of that offence, is a member of the same assembly, is guilty of that offence.
+Offence Description
+Punishment provided
+Cognizable/Non-Cognizable
+If an offence be committed by any member of an unlawful assembly, every other member of such assembly shall be guilty of the offence.
+The same as for a member of such assembly, and for any offence committed by any member of such assembly.
+According as offence is cognisable or non-cognisable
+Bailable/Non-Bailable
+Trial Court Details
+Compoundable/Non-Compoundable
+According as offence is bailable or non-bailable
+Court by which the offence is triable
+Non-Compoundable
+Compoundable by Whom
+Concerned Ministry
+Concerned Department
+Non-Compoundable
+Ministry of Home Affairs
+Department of Internal Security
