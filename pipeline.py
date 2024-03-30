@@ -132,7 +132,7 @@ if __name__ == "__main__":
     df = pd.read_csv("QnA-Website2.csv")
     temp = DataPipeline()
     # temp.scrape_sitemap("law.xml")
-    temp.run_query("What is the capital of India?")
+    print(temp.run_query("Act 10 of 1927 ?"))
     # new_rows = []
 
     # for index, row in df.iterrows():
@@ -151,14 +151,3 @@ if __name__ == "__main__":
 
     # new_df = pd.DataFrame(new_rows, columns=['Question', 'Text_File', 'Retrieved_document_1', 'Retrieved_document_2', 'Retrieved_document_3'])
     # new_df.to_csv("QnR-Taj.csv", index=False)
-
-
-
-
-
-# pinecone_index = self.initialize_pinecone()
-# vector_store = PineconeVectorStore(pinecone_index=pinecone_index)
-# documents = self.load_or_cache_documents("./cached_documents.pkl")
-# documents = self.load_or_cache_documents("./cached_documents.pkl")
-# documents = self.load_or_cache_documents("./cached_documents.pkl")
-# documents = self.load_or_cache_documents("./cached_documents.pkl")
