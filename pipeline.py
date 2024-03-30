@@ -129,25 +129,27 @@ class DataPipeline():
 
 if __name__ == "__main__":
     websites = ["https://www.iiitd.ac.in/dhruv"]
-    df = pd.read_csv("QnA-Website2.csv")
+    df = pd.read_csv("Combined-QnA.csv")
     temp = DataPipeline()
     # temp.scrape_sitemap("law.xml")
-    print(temp.run_query("Act 10 of 1927 ?"))
-    # new_rows = []
+    # print(temp.run_query("Act 10 of 1927 ?"))
+    new_rows = []
 
-    # for index, row in df.iterrows():
-    #     print(index)
-    #     ground_truth_doc = row['Text File']
-    #     query = row['Question']
-    #     query_answer = row['Answer']
-    #     retreived_docs = temp.run_query(query)
-    #     r_doc1 = retreived_docs[0].metadata['file_path'][57:]
-    #     r_doc2 = retreived_docs[1].metadata['file_path'][57:]
-    #     r_doc3 = retreived_docs[2].metadata['file_path'][57:]
+    for index, row in df.iterrows():
+        print(index)
+        ground_truth_doc = row['Text File']
+        query = row['Question']
+        query_answer = row['Answer']
+        retreived_docs = temp.run_query(query)
+        print(retreived_docs[0])
+        # print(retreived_docs[0].metadata['url'][57:])
+        r_doc1 = retreived_docs[0].metadata['url']
+        r_doc2 = retreived_docs[1].metadata['url']
+        r_doc3 = retreived_docs[2].metadata['url']
 
-    #     new_row = [query, ground_truth_doc, r_doc1, r_doc2, r_doc3]
-    #     new_rows.append(new_row)
-    #     # break
+        new_row = [query, ground_truth_doc, r_doc1, r_doc2, r_doc3]
+        new_rows.append(new_row)
+        # break
 
-    # new_df = pd.DataFrame(new_rows, columns=['Question', 'Text_File', 'Retrieved_document_1', 'Retrieved_document_2', 'Retrieved_document_3'])
-    # new_df.to_csv("QnR-Taj.csv", index=False)
+    new_df = pd.DataFrame(new_rows, columns=['Question', 'Text_File', 'Retrieved_document_1', 'Retrieved_document_2', 'Retrieved_document_3'])
+    new_df.to_csv("Combined-QnR.csv", index=False)
