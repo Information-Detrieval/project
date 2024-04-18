@@ -24,9 +24,10 @@ import pandas as pd
 
 path = os.getcwd()
 
+
 class DataPipeline():
     def __init__(self):
-        self.pkl_dir = os.path.join(path, "website_data" , "pkl")
+        self.pkl_dir = os.path.join(path, "website_data", "pkl")
         self.OPENAI_API_KEY = "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"
         self.PINECONE_API_KEY = "8a73267f-d64d-4d53-a5ae-0a241afd5517"
         os.environ["OPENAI_API_KEY"] = self.OPENAI_API_KEY
@@ -35,7 +36,8 @@ class DataPipeline():
         self.pinecone_index = self.initialize_pinecone()
         self.websites = ""
 
-    def scrape_websites(self, websites):
+    @staticmethod
+    def scrape_websites(websites):
         return WebScraper(websites).scrape_websites()
 
     def scrape_sitemap(self, sitemap):
@@ -58,7 +60,6 @@ class DataPipeline():
 
         except Exception as e:
             print(f"Pine Cone initialization failed: {e}")
-
 
     def initialize_index(self, documents, vector_store):
         embed_model = OpenAIEmbedding(model="text-embedding-ada-002", embed_batch_size=200)
@@ -84,15 +85,14 @@ class DataPipeline():
             index = VectorStoreIndex.from_vector_store(vector_store)
             index.storage_context.persist(persist_dir=self.PERSIST_DIR)
             return index
-    
 
     def run_query(self, query_str):
         def extract_metadata(filename):
-            json_path = filename.replace("txt","json")
+            json_path = filename.replace("txt", "json")
             with open(json_path, "r") as f:
                 metadata = json.load(f)
             return {"title": metadata.get("title", ""), "url": metadata.get("url", "")}
-        
+
         filename_fn = extract_metadata
         llm = OpenAI(model="gpt-3.5-turbo-0125", api_key=self.OPENAI_API_KEY)
         vector_store = PineconeVectorStore(pinecone_index=self.pinecone_index)
@@ -127,13 +127,14 @@ class DataPipeline():
         return retrieved_nodes
 
 
-
 if __name__ == "__main__":
     websites = ["https://www.iiitd.ac.in/dhruv"]
     df = pd.read_csv("Combined-QnA.csv")
     temp = DataPipeline()
     # temp.scrape_sitemap("law.xml")
-    print(temp.run_query("What is the punishment for a public servant unlawfully buying or bidding for property under Section 169 of the IPC?"))
+    print(temp.run_query(
+        "What is the punishment for a public servant unlawfully buying or bidding for property under Section 169 of "
+        "the IPC?"))
     new_rows = []
 
     # for index, row in df.iterrows():
