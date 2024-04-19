@@ -90,10 +90,7 @@ class DataPipeline():
 
     def run_query(self, query_str):
         def extract_metadata(filename):
-            json_path = filename.replace("txt", "json") #changed json to img_json
-            # print("--")
-            # print(filename, json_path)
-            # print("--")
+            json_path = filename.replace("txt", "json")
 
             with open(json_path, "r") as f:
                 metadata = json.load(f)
