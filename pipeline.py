@@ -132,35 +132,20 @@ class DataPipeline():
 
 
 def img_ir_pre(image_website):
-    # Create folders if they don't exist
-    # folders = ['img_json', 'imgs', 'img_txt']
-    # for folder in folders:
-    #     if not os.path.exists(folder):
-    #         os.makedirs(folder)
-
     json_name = "images_info.json"
     with open(json_name, "r") as f:
         img_json_file = json.load(f)
 
     for entry in img_json_file:
-        # print(entry)
         title = entry["title"]
         url = entry["url"]
         text = entry["text"]
-
-        # Check if image and text files exist
         image_path = os.path.join(image_website, url )
         text_path = os.path.join(image_website, url[:len(url)-4] + ".txt")
-        # print(image_path)
-        # print(text_path)
+
         if os.path.exists(image_path) and os.path.exists(text_path):
-            # Copy image to imgs folder
             shutil.copy(image_path, os.path.join("website_data/imgs", url))
-
-            # Copy text to img_txt folder
             shutil.copy(text_path, os.path.join("website_data/img_txt", title + ".txt"))
-
-            # Save entry as JSON file in img_json folder
             with open(os.path.join("website_data/img_json", title + ".json"), "w") as json_file:
                 json.dump(entry, json_file, indent=4)
 
