@@ -132,7 +132,7 @@ class DataPipeline():
             transformations=[
                 SentenceSplitter(
                     chunk_overlap=200,
-                    chunk_size=1024,
+                    chunk_size=3072,
                 ),
                 embed_model,
             ],
@@ -156,7 +156,7 @@ class DataPipeline():
 
             with open(json_path, "r") as f:
                 metadata = json.load(f)
-            return {"title": metadata.get("title", ""), "url": metadata.get("url", "")}
+            return {"title": metadata.get("title", ""), "url": metadata.get("url", ""), "html": metadata.get("html", "")}
 
         filename_fn = extract_metadata
         llm = OpenAI(model="gpt-3.5-turbo-0125", api_key=self.OPENAI_API_KEY)
@@ -166,18 +166,20 @@ class DataPipeline():
                 documents = pickle.load(f)
         else:
             documents = SimpleDirectoryReader(
-                os.path.join(path, "website_data", "img_txt"), #changed it to img_txt
+                os.path.join(path, "website_data", "txt"), #changed it to img_txt
                 file_metadata=filename_fn,
                 recursive=True,
             ).load_data()
             with open(os.path.join(path, "website_data", "pkl", "documents.pkl"), "wb") as f:
                 pickle.dump(documents, f)
 
+        # self.pinecone_index.delete(delete_all=True)
+
         # # Generate vectors for each document and add them to Pinecone along with metadata
         # for doc in documents:
         #     print(doc)
-        #     text = doc.get("text", "")
-        #     metadata = {"title": doc["title"], "url": doc["url"]}
+        #     text = doc.text
+        #     metadata = {"title": doc.metadata["title"], "url": doc.metadata["url"], "html": doc.metadata["html"]}
         #     vector = llm.generate_vecs(text)
         #     # vector_store.upsert(items=[vector], ids=[doc["url"]], metadata=[metadata])
         #     self.pinecone_index.upsert(vectors=[{
@@ -185,6 +187,7 @@ class DataPipeline():
         #         "values": vector,
         #         "metadata": metadata
         #     }])
+
 
         index = self.initialize_index(documents, vector_store)
         retriever = VectorIndexRetriever(index, similarity_top_k=3)
@@ -232,9 +235,7 @@ if __name__ == "__main__":
         img.show()
     temp.scrape_websites([
                              "https://www.latestlaws.com/bare-acts/central-acts-rules/ipc-section-166a-punishment-for-non-recording-of-information-/"])
-    print(temp.run_query(
-        "What is the punishment for a public servant unlawfully buying or bidding for property under Section 169 of "
-        "the IPC?"))
+    print(temp.run_query("What is the punishment for a public servant unlawfully buying or bidding for property under Section 169 of  the IPC?"))
     new_rows = []
 
     # for index, row in df.iterrows():

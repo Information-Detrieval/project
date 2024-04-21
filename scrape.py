@@ -92,6 +92,7 @@ class WebScraper:
                 #      TODO: Aditya there was an error so I added the if statement to check if the list is empty or not , cause it was giving me empty list
 
                 data = soup.get_text()
+                html = soup.prettify()
                 filename = self._get_filename(website)
                 html_filepath = os.path.join(self.html_dir, f"{filename}.html")
                 pkl_filepath = os.path.join(self.pkl_dir, f"{filename}.txt")
@@ -106,7 +107,8 @@ class WebScraper:
                 self._write_to_file(json_filepath, json.dumps({
                     "title": title,
                     "url": website,
-                    "text": txt
+                    "text": txt,
+                    "html": html,
                 }, indent=4))
 
                 mapping[website] = f"{filename}.pkl"
