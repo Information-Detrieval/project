@@ -1,3 +1,4 @@
+import datetime
 import os.path
 
 import os
@@ -5,6 +6,7 @@ import pickle
 import time
 import json
 from urllib.parse import urlparse, urljoin
+import xml.etree.ElementTree as ET
 
 import requests
 from bs4 import BeautifulSoup
@@ -53,14 +55,31 @@ class DataPipeline():
         # create the sitemap for each domain and url and store it in an xml file
         for domain in unique_domains:
             sitemap = self.create_sitemap(mapping[domain], 2)
-            with open(f"{domain}.xml", "w") as f:
-                f.write(sitemap)
+
+            # Create the root element
+            urlset = ET.Element('urlset', {
+                'xmlns': 'http://www.sitemaps.org/schemas/sitemap/0.9',
+                'xmlns:xsi': 'http://www.w3.org/2001/XMLSchema-instance',
+                'xsi:schemaLocation': 'http://www.sitemaps.org/schemas/sitemap/0.9 http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd'
+            })
+
+            # Add each URL to the sitemap
+            for url in sitemap:
+                url_element = ET.SubElement(urlset, 'url')
+                loc_element = ET.SubElement(url_element, 'loc')
+                loc_element.text = url
+                lastmod_element = ET.SubElement(url_element, 'lastmod')
+                lastmod_element.text = datetime.datetime.now().isoformat()
+
+            # Write the XML data to the file
+            tree = ET.ElementTree(urlset)
+            tree.write(f"{domain}.xml", encoding='utf-8', xml_declaration=True)
 
         return scraped_data
         # return WebScraper(websites).scrape_websites()
 
     def create_sitemap(self, base_url, depth):
-        if depth == 0:
+        if depth <= 0:
             return []
 
         sitemap = [base_url]
@@ -68,7 +87,8 @@ class DataPipeline():
             response = requests.get(base_url)
             soup = BeautifulSoup(response.text, 'html.parser')
 
-            for link in soup.find_all('a'):
+            links = soup.find_all('a')
+            for link in links[:depth]:  # Limit the number of links to follow
                 url = link.get('href')
                 if url:
                     # Resolve relative links
@@ -173,7 +193,8 @@ if __name__ == "__main__":
     websites = ["https://www.iiitd.ac.in/dhruv"]
     df = pd.read_csv("Combined-QnA.csv")
     temp = DataPipeline()
-    temp.scrape_websites(["https://www.latestlaws.com/bare-acts/central-acts-rules/ipc-section-166a-punishment-for-non-recording-of-information-/"])
+    # temp.scrape_websites(["https://www.latestlaws.com/bare-acts/central-acts-rules/ipc-section-166a-punishment-for-non-recording-of-information-/"])
+    temp.scrape_sitemap("news.xml")
     # print(temp.run_query(
     #     "What is the punishment for a public servant unlawfully buying or bidding for property under Section 169 of "
     #     "the IPC?"))

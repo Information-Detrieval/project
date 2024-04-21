@@ -17,6 +17,7 @@ from llama_index.core import (
 )
 import xml.etree.ElementTree as ET
 
+from lxml import etree
 from nltk import word_tokenize, PorterStemmer, WordNetLemmatizer
 from nltk.corpus import stopwords
 
@@ -84,7 +85,11 @@ class WebScraper:
 
                 if website.startswith("https://www.latestlaws.com"):
                     selector = "#content-area > div > div > div.col-md-6.order-1.order-sm-1.order-md-2 > div:nth-child(4) > div:nth-child(1) > div.page-content.actdetail.act-single-page"
-                    soup = soup.select(selector)[0]
+                    selected_elements = soup.select(selector)
+                    if selected_elements:  # Check if the list is not empty
+                        soup = selected_elements[0]
+                    # soup = soup.select(selector)[0]
+                #      TODO: Aditya there was an error so I added the if statement to check if the list is empty or not , cause it was giving me empty list
 
                 data = soup.get_text()
                 filename = self._get_filename(website)
@@ -148,9 +153,9 @@ class WebScraper:
 
     def scraped_sitemap(self, sitemap_file):
         try:
-            with open(sitemap_file, "r", encoding="utf-8") as f:
+            with open(sitemap_file, "rb") as f:  # Open the file in binary mode
                 sitemap_xml = f.read()
-                root = ET.fromstring(sitemap_xml)
+                root = etree.fromstring(sitemap_xml)
 
                 # Define the namespace
                 ns = {"ns": "http://www.sitemaps.org/schemas/sitemap/0.9"}
