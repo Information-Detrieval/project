@@ -58,6 +58,6 @@ def get_sitemap_urls(url):
     else:
         return []
 
-website_url = 'https://www.latestlaws.com/'
-sitemap_urls = get_sitemap_urls(website_url)
-print(f"URLs found in the sitemap: {sitemap_urls}")
+# website_url = 'https://www.latestlaws.com/'
+# sitemap_urls = get_sitemap_urls(website_url)
+# print(f"URLs found in the sitemap: {sitemap_urls}")

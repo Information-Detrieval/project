@@ -5,7 +5,6 @@ from flask_cors import CORS
 app = Flask(__name__)
 CORS(app)
 
-pipeline = DataPipeline()
 pipeline_text = DataPipeline("txt")
 pipeline_img = DataPipeline("img")
 
@@ -13,18 +12,15 @@ pipeline_img = DataPipeline("img")
 @app.route('/scrape_websites', methods=['POST'])
 def scrape_websites():
     websites = request.get_json()['websites']
-    result = pipeline.scrape_websites(websites)
-    return jsonify({})
-    websites = request.json['websites']
     result = pipeline_text.scrape_websites(websites)
-    return jsonify(result)
+    return jsonify({})
+
 
 
 @app.route('/scrape_sitemap', methods=['POST'])
 def scrape_sitemap():
-    sitemap = request.json['sitemap']
-
-    result = pipeline_text.scrape_sitemap(sitemap)
+    website = request.get_json()['website']
+    result = pipeline_text.scrape_sitemap(website)
     return jsonify(result)
 
 
