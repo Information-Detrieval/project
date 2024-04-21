@@ -29,6 +29,11 @@ from scrape import WebScraper
 import pandas as pd
 import shutil
 from PIL import Image
+from langchain_openai import OpenAIEmbeddings
+from langchain_pinecone import PineconeVectorStore as langchainVectorStore
+from langchain_openai import ChatOpenAI
+from langchain.chains import RetrievalQA
+
 
 path = os.getcwd()
 
@@ -221,6 +226,35 @@ def img_ir_pre(image_website):
 # image_website = "images_india"
 # img_ir_pre(image_website)
 
+def generativeQnA(data, query):
+    model_name = 'text-embedding-ada-002'
+    embed = OpenAIEmbeddings(
+            model=model_name,
+            openai_api_key=data.OPENAI_API_KEY
+            )
+    
+    text_field = "url"  # the metadata field that contains our context
+
+    vector_store = langchainVectorStore(data.pinecone_index, embed, text_field)
+    
+    # completion llm
+    llm = ChatOpenAI(
+        openai_api_key=data.OPENAI_API_KEY,
+        model_name='gpt-3.5-turbo',
+        temperature=0.0
+    )
+
+    qa = RetrievalQA.from_chain_type(
+        llm=llm,
+        chain_type="stuff",
+        retriever=vector_store.as_retriever()
+    )
+    
+    return qa.invoke(query)
+    
+    
+
+
 if __name__ == "__main__":
     websites = ["https://www.iiitd.ac.in/dhruv"]
     df = pd.read_csv("Combined-QnA.csv")
@@ -244,6 +278,10 @@ if __name__ == "__main__":
         "the IPC?"))
     new_rows = []
 
+    # data = DataPipeline("txt")
+    # data.initialize_documents("txt")
+    # print(generativeQnA(data, "What is the punishment for a public servant unlawfully buying or bidding for property under Section 169 of the IPC"))
+    
 
 
 
