@@ -19,7 +19,6 @@ def scrape_websites():
     return jsonify({})
 
 
-
 @app.route('/scrape_sitemap', methods=['POST'])
 def scrape_sitemap():
     website = request.get_json()['website']
@@ -46,7 +45,5 @@ def home():
     return "Welcome to DeRetrival Backend API!"
 
 
-
 if __name__ == '__main__':
     app.run(port=8000, debug=True)
-
