@@ -10,9 +10,9 @@ pipeline = DataPipeline()
 
 @app.route('/scrape_websites', methods=['POST'])
 def scrape_websites():
-    websites = request.json['websites']
+    websites = request.get_json()['websites']
     result = pipeline.scrape_websites(websites)
-    return jsonify(result)
+    return jsonify({})
 
 
 @app.route('/scrape_sitemap', methods=['POST'])
