@@ -1,0 +1,372 @@
+%%
+%% This is file `sample-manuscript.tex',
+%% generated with the docstrip utility.
+%%
+%% The original source files were:
+%%
+%% samples.dtx  (with options: `manuscript')
+%% 
+%% IMPORTANT NOTICE:
+%% 
+%% For the copyright see the source file.
+%% 
+%% Any modified versions of this file must be renamed
+%% with new filenames distinct from sample-manuscript.tex.
+%% 
+%% For distribution of the original source see the terms
+%% for copying and modification in the file samples.dtx.
+%% 
+%% This generated file may be distributed as long as the
+%% original source files, as listed above, are part of the
+%% same distribution. (The sources need not necessarily be
+%% in the same archive or directory.)
+%%
+%% Commands for TeXCount
+%TC:macro \cite [option:text,text]
+%TC:macro \citep [option:text,text]
+%TC:macro \citet [option:text,text]
+%TC:envir table 0 1
+%TC:envir table* 0 1
+%TC:envir tabular [ignore] word
+%TC:envir displaymath 0 word
+%TC:envir math 0 word
+%TC:envir comment 0 0
+%%
+%%
+%% The first command in your LaTeX source must be the \documentclass command.
+%%%% Small single column format, used for CIE, CSUR, DTRAP, JACM, JDIQ, JEA, JERIC, JETC, PACMCGIT, TAAS, TACCESS, TACO, TALG, TALLIP (formerly TALIP), TCPS, TDSCI, TEAC, TECS, TELO, THRI, TIIS, TIOT, TISSEC, TIST, TKDD, TMIS, TOCE, TOCHI, TOCL, TOCS, TOCT, TODAES, TODS, TOIS, TOIT, TOMACS, TOMM (formerly TOMCCAP), TOMPECS, TOMS, TOPC, TOPLAS, TOPS, TOS, TOSEM, TOSN, TQC, TRETS, TSAS, TSC, TSLP, TWEB.
+% \documentclass[acmsmall]{acmart}
+
+%%%% Large single column format, used for IMWUT, JOCCH, PACMPL, POMACS, TAP, PACMHCI
+% \documentclass[acmlarge,screen]{acmart}
+
+%%%% Large double column format, used for TOG
+% \documentclass[acmtog, authorversion]{acmart}
+
+%%%% Generic manuscript mode, required for submission
+%%%% and peer review
+\documentclass[sigconf,natbib=true,anonymous=false]{acmart}
+%% Fonts used in the template cannot be substituted; margin 
+%% adjustments are not allowed.
+%%
+%% \BibTeX command to typeset BibTeX logo in the docs
+\AtBeginDocument{%
+  \providecommand\BibTeX{{%
+    \normalfont B\kern-0.5em{\scshape i\kern-0.25em b}\kern-0.8em\TeX}}}
+
+%% Rights management information.  This information is sent to you
+%% when you complete the rights form.  These commands have SAMPLE
+%% values in them; it is your responsibility as an author to replace
+%% the commands and values with those provided to you when you
+%% complete the rights form.
+% \setcopyright{acmlicensed}
+% \copyrightyear{2024}
+% \acmYear{2024}
+% \acmDOI{XXXXXXX.XXXXXXX}
+
+%% These commands are for a PROCEEDINGS abstract or paper.
+% \acmConference[Conference acronym 'XX]{Make sure to enter the correct
+%   conference title from your rights confirmation emai}{June 03--05,
+%   2018}{Woodstock, NY}
+%
+%  Uncomment \acmBooktitle if th title of the proceedings is different
+%  from ``Proceedings of ...''!
+%
+% \acmBooktitle{Woodstock '18: ACM Symposium on Neural Gaze Detection,
+%  June 03--05, 2018, Woodstock, NY} 
+% \acmISBN{978-1-4503-XXXX-X/18/06}
+
+
+%%
+%% Submission ID.
+%% Use this when submitting an article to a sponsored event. You'll
+%% receive a unique submission ID from the organizers
+%% of the event, and this ID should be used as the parameter to this command.
+%%\acmSubmissionID{123-A56-BU3}
+
+%%
+%% For managing citations, it is recommended to use bibliography
+%% files in BibTeX format.
+%%
+%% You can then either use BibTeX with the ACM-Reference-Format style,
+%% or BibLaTeX with the acmnumeric or acmauthoryear sytles, that include
+%% support for advanced citation of software artefact from the
+%% biblatex-software package, also separately available on CTAN.
+%%
+%% Look at the sample-*-biblatex.tex files for templates showcasing
+%% the biblatex styles.
+%%
+
+%%
+%% The majority of ACM publications use numbered citations and
+%% references.  The command \citestyle{authoryear} switches to the
+%% "author year" style.
+%%
+%% If you are preparing content for an event
+%% sponsored by ACM SIGGRAPH, you must use the "author year" style of
+%% citations and references.
+%% Uncommenting
+%% the next command will enable that style.
+%%\citestyle{acmauthoryear}
+
+%%
+%% end of the preamble, start of the body of the document source.
+\begin{document}
+
+%%
+%% The "title" command has an optional parameter,
+%% allowing the author to define a "short title" to be used in page headers.
+\title{Group 41 - Final Project Review  CSE508 - Winter 2024}
+
+%%
+%% The "author" command and its associated commands are used to define
+%% the authors and their affiliations.
+%% Of note is the shared affiliation of the first two authors, and the
+%% "authornote" and "authornotemark" commands
+%% used to denote shared contribution to the research.
+
+\author{Arnav Goel, Aditya Pratap Singh, Ashutosh Gera, Medha Hira, Nalish Jain, Shikhar Sharma}
+\email{{arnav21519, aditya20016, ashutosh21026, medha21265, nalish21543, shikhar20121}@iiitd.ac.in}
+\affiliation{%
+  \institution{IIIT Delhi, New Delhi}
+  \country{India}
+}
+
+%%
+%% By default, the full list of authors will be used in the page
+%% headers. Often, this list is too long, and will overlap
+%% other information printed in the page headers. This command allows
+%% the author to define a more concise list
+%% of authors' names for this purpose.
+% \renewcommand{\shortauthors}{Trovato and Tobin, et al.}
+
+%%
+%% The abstract is a short summary of the work to be presented in the
+%% article.
+% \begin{abstract}
+%   A clear and well-documented \LaTeX\ document is presented as an
+%   article formatted for publication by ACM in a conference proceedings
+%   or journal publication. Based on the ``acmart'' document class, this
+%   article presents and explains many of the common variations, as well
+%   as many of the formatting elements an author may use in the
+%   preparation of the documentation of their work.
+% \end{abstract}
+
+%%
+%% The code below is generated by the tool at http://dl.acm.org/ccs.cfm.
+%% Please copy and paste the code instead of the example below.
+%%
+% \begin{CCSXML}
+% <ccs2012>
+% <concept>
+% <concept_id>10002951.10003317</concept_id>
+% <concept_desc>Information systems~Information retrieval</concept_desc>
+% <concept_significance>300</concept_significance>
+% </concept>
+% </ccs2012>
+% \end{CCSXML}
+
+\ccsdesc[300]{Information systems~Information retrieval}
+%%
+%% Keywords. The author(s) should pick words that accurately describe
+%% the work being presented. Separate the keywords with commas.
+% \keywords{Do, Not, Us, This, Code, Put, the, Correct, Terms, for,
+%   Your, Paper}
+
+%% A "teaser" image appears between the author and affiliation
+%% information and the body of the document, and typically spans the
+%% page.
+% \begin{teaserfigure}
+%   \includegraphics[width=\textwidth]{sampleteaser}
+%   \caption{Seattle Mariners at Spring Training, 2010.}
+%   \Description{Enjoying the baseball game from the third-base
+%   seats. Ichiro Suzuki preparing to bat.}
+%   \label{fig:teaser}
+% \end{teaserfigure}
+
+% \received{20 February 2007}
+% \received[revised]{12 March 2009}
+% \received[accepted]{5 June 2009}
+
+%%
+%% This command processes the author and affiliation and title
+%% information and builds the first part of the formatted document.
+\maketitle
+
+\section{Introduction}
+In the contemporary digital landscape, users encounter significant challenges in accessing pertinent information and personalized assistance seamlessly across various online platforms. The absence of a \textbf{unified assistant} contributes to a disjointed user experience, adversely affecting productivity and accessibility. In response to this issue, our all-encompassing browser extension serves as an indispensable co-pilot. It seamlessly incorporates features such as a chat-bot interface, multi-modal content retrieval, extensive language support, semantic caching for optimal performance, and robust databases for efficient storage of chat and web-page content.
+
+An inherent issue faced by chat-bots, namely the propensity to generate inaccurate information due to hallucination. While this is acceptable for generative purposes, our solution needs to go a step further due to the prioritization of correctness in the answers given. This is tackled in our model through the implementation of techniques such as controlled history exposure. This is achieved through intelligent aggregation of information from diverse resources, mitigating the impact of hallucinations that can significantly compromise the reliability of responses.
+
+
+\section{Motivation}
+
+Addressing the above problem is not just a convenience but a critical enhancement to the overall user experience in web interactions. The absence of a unified assistant across all website tabs poses a significant challenge, impacting user productivity and satisfaction. 
+
+Due to the lack of a similar tool issues faced are:
+
+\begin{itemize}
+\item \textbf{Fragmented User Experience}: The lack of a unified intelligent assistant leads to disjointed interactions and a suboptimal user experience. This hampers productivity, causing challenges in understanding, retrieving information, accessing personalized assistance.
+\item \textbf{Accessibility Concerns}: The absence of a cohesive solution hampers accessibility, making it challenging for users to find needed information, especially across multiple tabs, affecting their ability to fully leverage resources on various websites.
+\item \textbf{Complex Online Landscape}: In the era of vast digital information, navigating the increasingly complex online landscape has become daunting for users. The absence of a unified assistant exacerbates this challenge. Current hardcoded chatbots contribute to user frustration by providing only default, pre-fed answers.
+\item \textbf{Need for Personalized Assistance}: Users desire personalized support during online interactions. The lack of an intelligent assistant hinders their ability to receive tailored information and assistance, impacting the relevance and specificity of support.
+\item \textbf{Impact on Multilingual Interactions}: In the realm of online interactions involving diverse languages, a versatile language model is crucial. Absence of such capability introduces language barriers, constraining effective communication for users.
+\end{itemize}
+
+Our solution integrates a chatbot interface, an information retrieval system, a sophisticated language model along with RAG pipeline, and key technologies to enhance user experience significantly. It addresses the limitations of current systems, especially those dependent on chatbots, by extending the scope of answers beyond the confines of a specific website's domain knowledge. This capability addresses a common user frustration: the reliance on guesswork or the expensive fallback of routing queries to human operators. Our browser extension eliminates these issues by offering quick, context-sensitive responses, streamlining the browsing experience without the usual delays or inaccuracies. Moreover, it reduces the need to escalate queries to human operators, thereby increasing operational efficiency and providing a more cost-effective solution. This strategy significantly diminishes the system's reliance on human intervention, making it more autonomous and efficient.
+
+\section{Technologies \& Algorithms used}
+\begin{itemize}
+    \item {\textbf{Frontend for the ChatBot Interface}}: ReactJS will be used to create an interactive user interface that contains a seamless and easy-to-use UI, giving the users a quality experience.
+    \item {\textbf{Backend}}: The set of scraped/retrieved webpages will be stored across multiple vector databases. We have used Pinecone as the vector database. 
+    \item {\textbf{Retrieval Algorithms for Ranking and Matching}}: Cosine similarity has been used as the similiarity metric.
+    % \item {\textbf{Ranking}}: We will aim to investigate probabilistic and vector space models for ranking and use algorithms like PageRank. Ranking can also be done on the metadata which can be generated synthetically.
+
+    % \item {\textbf{Audio Processing (Audio inputs and for audio retrieval)}}
+    % Whisper (OpenAI) can be used for ASR. Bhashini API is for ASR and TTS for Indian Languages.
+    \item \textbf{Creating a Chrome Extension}: This is the toolkit we will use for creating a Chrome extension. \href{https://developer.chrome.com/docs/extensions/get-started}{(Toolkit)}
+    \item {\textbf{Framework for applications of LLM}}: Langchain will be used to call LLM APIs and use them with our retrieval framework.
+\end{itemize}
+\section{Novelty}
+
+In comparison to the existing systems, our proposed idea offers a significantly enhanced user experience through a more robust context derived directly from the open tab. Our approach focuses on seamless integration and a stronger contextual understanding, ensuring better alignment with user preferences. A key feature is the personalization of user content, achieved through real-time data scraping on logged-in pages, ensuring that the information presented is both relevant and up-to-date. The system's capacity to tap into the entire webpage, as well as the specific section the user is viewing, offers a more nuanced understanding of the user's context. Additionally, our system supports multiple tab functionalities with a history that extends up to three previous tabs for enhanced pilot control.
+
+Moreover, our idea stands out with the integration of modality in both input and output channels. The inclusion of multimodal retrieval further distinguishes our system, enabling us to answer user queries using a combination of various modes of information retrieval. Finally, the implementation of page-based question prompts ensures that users are presented with relevant inquiries tailored to each page, fostering a more interactive and user-centric browsing experience.
+
+\section{Related Work}
+Current products in the market, such as \verb|Microsoft Copilot| and \verb|Perplexity AI|, serve as generalized co-pilots for users during browsing or searching.
+
+In the initial phase of our pipeline, the accuracy of subsequent outputs heavily relies on effective data extraction. Previous works, exemplified by \cite{10.1145/3539618.3591920}, have employed NLTK's punkt tokenizer to proficiently split sentences and tokenize them into Unicode word tokens. Additionally, the Body Text Extraction (BTE) algorithm, rooted in HTML tag distribution, enhances the extraction process. The paper introduces three ensembles as novel state-of-the-art extraction baselines. Moreover, the authors have demonstrated a thorough approach by amalgamating and refining various existing human-labeled web content extraction datasets. This meticulous compilation creates a comprehensive benchmark for evaluation, offering valuable insights instrumental in guiding our project forward.
+
+Complex search tasks require more than support for rudimentary fact-finding or re-finding. The recent emergence of generative artificial intelligence (AI) and the arrival of assistive agents, or copilots, based on this technology has the potential to offer further assistance to searchers, especially those engaged in complex tasks. The authors \textbf{\cite{10.1145/3642979.3642985}} discuss the challenges and opportunities for researching, developing and deploying search copilots and ends by concluding that careful search interface design is required to help people quickly understand copilot capabilities, to unify search and copilots to simplify the search experience and preserve flow.
+
+In the landscape of Multimodal Large Language Models (MM-LLM), the paper \textbf{\cite{wu2023nextgpt} }introduces NExT-GPT, an innovative system designed for versatile interactions across diverse modalities, including text, images, videos, and audio. Unlike prior models, NExT-GPT achieves this by connecting a Large Language Model (LLM) with multimodal adaptors and distinct diffusion decoders. Notably, the model leverages well-trained encoders and decoders, requiring minimal parameter tuning, making it cost-effective and poised for potential expansion into more modalities. The introduction of modality-switching instruction tuning (MosIT) and a dedicated dataset for MosIT enhances NExT-GPT's cross-modal semantic understanding and content generation capabilities. This research makes a significant contribution by presenting NExT-GPT as a pioneering MM-LLM system, bridging modalities and paving the way for more human-like AI agents.
+
+Conversational Information Seeking (CIS) has emerged as a novel paradigm for search engines, departing from the conventional query-Search Engine Results Page (SERP) paradigm. Unlike traditional methods, CIS empowers users to articulate their information needs through direct conversations with the search engine. The work by \cite{wizard-of-search-engine} presents a comprehensive approach to CIS, introducing a pipeline, a dataset, and a model to enhance information retrieval in conversational systems. The proposed pipeline consists of six integral sub-tasks: intent detection, key-phrase extraction, action prediction, query selection, passage selection, and response generation. This design aims to seamlessly integrate traditional search engine functionalities with the characteristics of conversational AI. The dataset, named WISE (Wizard of Search Engine), is constructed using a wizard-of-oz setup, simulating human-human CIS conversations. This approach captures a diverse range of information needs and conversational interactions. Furthermore, the paper proposes a modular end-to-end neural architecture tailored to each sub-task, allowing for both joint and separate training and evaluation.
+
+A crucial facet of our product involves enhancing large language models by incorporating retrieved passages to enhance domain-specific question answering. As highlighted by \cite{izacard-grave-2021-leveraging}, generative models for question answering can significantly benefit from passage retrieval. The approach involves extracting supporting text passages from an external knowledge source, such as Wikipedia. Subsequently, a generative encoder-decoder model generates the answer, taking into account both the question and the retrieved passages. We draw upon the insights provided by this study to reinforce our rationale for utilizing retrieval mechanisms to effectively augment Large Language Models (LLMs) when addressing user queries related to a webpage.
+
+The concept of Retrieval-Augmented Generative (RAG) models, as introduced by Lewis et al. in their seminal work \cite{DBLP:journals/corr/abs-2005-11401}, has significantly influenced the landscape of natural language understanding and question answering systems. RAG models leverage the power of large-scale pre-trained language models (LLMs) and enhance their performance by integrating retrieval mechanisms. This unique approach addresses the limitations of purely generative models by incorporating relevant passages retrieved from an external knowledge source.Lewis et al.'s work emphasizes the crucial role of passage retrieval in augmenting the capabilities of generative models for question answering. This retrieval-augmentation paradigm enables the model to access a broader spectrum of information, providing a contextually rich foundation for generating responses.
+In alignment with the principles laid out in the RAG paper, our work focuses on applying the RAG model framework to the domain of domain-specific question answering. We recognize the potential of RAG models to enhance large language models (LLMs) with domain-specific information, thereby improving the accuracy and relevance of responses to user queries about queried content in the webpages.
+
+
+\section{Pipeline}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\linewidth]{Pipeline.pdf}
+    \caption{Data Pipeline}
+    \label{fig:enter-label}
+\end{figure}
+
+The \textit{DataPipeline} class in our code is designed to scrape websites, initialize a Pinecone index, initialize a vector store index, and run queries on the index. Here is a detailed description of all the individual steps:
+
+\begin{itemize}
+
+\item \textbf{Web scraping:} The \textit{scrape\_websites} method is used to scrape each website in the list. It sends a GET request to the website, parses the HTML response using BeautifulSoup 4, and extracts the text content. A \textbf{domain-specific custom CSS-based selector} is used to locate useful content on the scraped page.
+\newline
+\newline
+The text content is then cleaned to remove repeated blank lines. Additionally, we also save the URL and title (after stopword removal and lemmatization) of the page as the \textbf{supporting metadata}. The cleaned text and the original HTML are saved to separate files in the local storage. The method also maintains a mapping of websites to their corresponding data files.
+
+\item \textbf{Pinecone Initialization:} Pinecone is a vector database service that allows you to store, search, and retrieve high-dimensional vectors. In the \textit{initialize\_pinecone} method, a Pinecone index named "detrieval" is created if it doesn't exist. This index will be used to store and retrieve vectors.  
+
+\item \textbf{Index Initialization:} The \textit{initialize\_index} method is used to initialize a vector store index. This index is created by running an ingestion pipeline on the documents. The pipeline includes a sentence splitter and an embedding model. The sentence splitter breaks the documents into sentences, and the embedding model transforms these sentences into high-dimensional vectors. These vectors are then stored in the vector store index. 
+
+Fundamentally there are two filtering methods with vectors: pre and post filtering. Pinecone utilizes a Single-Stage Filtering algorithm giving benefits of pre-filtering accuracy without being restricted to small datasets. Additionally, we have implemented a function which is responsible to add metadata into vector store aiding in First Stage Filtering.
+
+\item \textbf{Running Queries:} The \textit{run\_query} method is used to run a query on the index. It first checks if the documents are pickled and loads them if they are. If not, it reads the documents from a directory and pickles them for future use. It then initializes the index and a retriever. The retriever is used to retrieve the top 3 similar nodes to the query string from the index. This is done by transforming the query string into a vector using the same embedding model, and then retrieving the vectors in the index that are most similar to the query vector.
+\end{itemize}
+
+\section{Experiments and Result}
+\subsection{Query Generation}
+For testing our pipeline, we generated some queries from our corpora of documents. This was done to check the ability of our employed retrieval pipeline to retrieve accurate and relevant documents upon being prompted with a query. The following steps are followed for this process:
+\begin{itemize}
+    \item Websites from the IIITD domain such as the ones about \textit{B.Tech Project, Guest House, Hostels, Mess, Student Affairs} etc and Taj were scraped and stored as \textit{.txt} files. These served as the document corpus for our experimentation. In total the corpus consisted of \textbf{10 such documents} for each website on which our pipeline will perform retrieval.
+    \item Each \textit{.txt} file was copied and was then input to OpenAI's ChatGPT chatbot \footnote{https://openai.com/blog/chatgpt} with the \textbf{zero-shot prompt}: \newline \emph{You are a question setter. Go through the text given to you and give 5 question-answer pairs from it}.
+    \item This prompt generates 5 candidate question-answer pairs for each document. We select the top 2 queries from this and feed it into a pool of queries to test our retrieval system on.
+\end{itemize}
+
+\subsection{Evaluation Metrics}
+Since this report details our baseline experiments for the retrieval setup, we employ the following binary relevancy metrics for evaluating our system. Based on the query generation, there is one relevant document for each input query. 
+\begin{enumerate}
+    \item \textbf{Precision@K}: Is the proportion of retrieved documents in the top K results that are relevant. Since there's only one relevant document per query, Precision@K will be 1 if the relevant document is within the top K results, and 0 otherwise.
+    \item \textbf{Recall@K}: Measures the proportion of relevant documents that are retrieved in the top K results out of all relevant documents. Since there is only one relevant document for each query, Recall@K is 1 if the relevant document is within the top K results and 0 if it is not.
+    \item \textbf{F1@K}: The F1 score at K is the harmonic mean of Precision@K and Recall@K. Given that there's only one relevant document per query, F1@K essentially measures the balance between Precision@K and Recall@K. Because Precision@K and Recall@K will always be the same, F1@K will also mirror those values.
+    \item Mean Average Precision (MAP): Mean Average Precision (MAP) is a metric that calculates the average precision across all relevant documents for each query in information retrieval tasks, providing a comprehensive measure of system accuracy.
+\end{enumerate}
+
+We have a total of 20 generated queries with their most relevant document (i.e. the ground truth) as described in the previous section. We prompt these 20 queries one by one to the pipeline and retrieve the \textbf{3 most relevant documents}. We then evaluate against the ground truth for testing the robustness of our system. 
+
+
+
+\subsection{Results}
+
+This section describes the results obtained by our system on the evaluation metrics and experiments described in the previous section. The results using cosine similarity for retrieval are summarised in the table \ref{tab:metrics} for IIIT Delhi website and in table \ref{tab:metrics_taj} for Taj Mahal website. 
+
+We report the metrics Precision@K, Recall@K and F1@K averaged over the 20 queries used by us to test the system. Thus we refer to it as an average of those values. The values @1 are high indicating our system's robust ability to retrieve the relevant document as the first one itself. Precision values @2 and @3 are lower because of there being only one relevant document in this current experiment. This is also reflected by our Recall@K values being 1 for $K=2, K=3$ which means all relevant documents are retrieved. The further robustness of our system is validated by the high Mean Average Precision (MAP) value reported in the end.
+
+\begin{table}[h]
+\centering
+\begin{tabular}{cccc}
+\hline
+\textbf{K} & \textbf{Avg Precision@K} & \textbf{Avg Recall@K} & \textbf{ Avg F1@K} \\ \hline
+1          & 0.85                 & 0.85              & 0.85          \\
+2          & 0.5                  & 1                 & 0.66          \\
+3          & 0.33                 & 1                 & 0.496         \\ 
+\hline
+&\textbf{MAP}        &0.925& \\
+\hline
+\end{tabular}
+\caption{Pipeline Results using Cosine Similarity (IIIT D)}
+\label{tab:metrics}
+\end{table}
+
+\begin{table}[h]
+\centering
+\begin{tabular}{cccc}
+\hline
+\textbf{K} & \textbf{Avg Precision@K} & \textbf{Avg Recall@K} & \textbf{ Avg F1@K} \\ \hline
+1          & 0.88                & 0.88              & 0.88          \\
+2          & 0.47                 & 0.94                 & 0.63          \\
+3          & 0.31                 & 0.94              & 0.47         \\ 
+\hline
+&\textbf{MAP}        &0.916& \\
+\hline
+\end{tabular}
+\caption{Pipeline Results using Cosine Similarity (Taj)}
+\label{tab:metrics_taj}
+\end{table}
+
+\textbf{Combined Retrieval from 3 websites:} Furthermore, we combined the data of 3 websites i.e \href{www.iiitd.ac.in}{IIIT Delhi}, \href{www.tajmahal.gov.in}{Taj mahal}, and \href{www.latestlaws.com}{a law website (latestlaws.com)} and tested the system by performing 47 queries on the system. The metrics obtained are summarised in table \ref{tab:metrics_combined} as follows: 
+
+\begin{table}[h]
+\centering
+\begin{tabular}{cccc}
+\hline
+\textbf{K} & \textbf{Avg Precision@K} & \textbf{Avg Recall@K} & \textbf{ Avg F1@K} \\ \hline
+1          & 0.89                 & 0.89              & 0.89          \\
+2          & 0.56                  & 0.95                 & 0.71          \\
+3          & 0.41                 & 0.97                 & 0.58         \\ 
+\hline
+&\textbf{MAP}        &0.932& \\
+\hline
+\end{tabular}
+\caption{Combined Pipeline Results for all 3 websites}
+\label{tab:metrics_combined}
+\end{table}
+
+\section{Potential Contributions}
+Our contribution in this work will be developing a pipeline capable of chatting with the user and retrieving answers based on queries on pages they are surfing. This will be provided by an extension that exists as an overlay of the browser. We also aim to involve multimodal retrieval by allowing Q\&A over images and audio data. This will be supported by multiple multimodal input and output channels according to the query. Our contributions will be vital in making open-source products which can be helpful for understanding focused context and improve grounding.
+%%
+%% The next two lines define the bibliography style to be used, and
+%% the bibliography file.
+\bibliographystyle{ACM-Reference-Format}
+\bibliography{sample-base}
+%%
+%% If your work has an appendix, this is the place to put it.
+\appendix
+
+\end{document}
+\endinput
+%%
+%% End of file `sample-authordraft.tex'.
