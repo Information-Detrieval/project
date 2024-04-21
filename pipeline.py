@@ -219,7 +219,7 @@ if __name__ == "__main__":
     websites = ["https://www.iiitd.ac.in/dhruv"]
     df = pd.read_csv("Combined-QnA.csv")
     temp = DataPipeline()
-    temp.scrape_websites(["https://www.latestlaws.com/bare-acts/central-acts-rules/ipc-section-166a-punishment-for-non-recording-of-information-/"])
+    # temp.scrape_websites(["https://www.latestlaws.com/bare-acts/central-acts-rules/ipc-section-166a-punishment-for-non-recording-of-information-/"])
     temp.scrape_sitemap("news.xml")
     # temp.scrape_sitemap("law.xml")
     obj = temp.run_query(
