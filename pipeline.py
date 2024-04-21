@@ -4,6 +4,10 @@ import os
 import pickle
 import time
 import json
+from urllib.parse import urlparse, urljoin
+
+import requests
+from bs4 import BeautifulSoup
 from llama_index.core import (
     VectorStoreIndex,
     SimpleDirectoryReader,
@@ -36,9 +40,47 @@ class DataPipeline():
         self.pinecone_index = self.initialize_pinecone()
         self.websites = ""
 
-    @staticmethod
-    def scrape_websites(websites):
-        return WebScraper(websites).scrape_websites()
+    def scrape_websites(self, websites):
+        scraped_data = WebScraper(websites).scrape_websites
+        unique_domains = list(set([urlparse(website).netloc for website in websites]))
+        mapping = {urlparse(website).netloc: website for website in websites}
+        with open("mapping.pkl", "wb") as f:
+            pickle.dump(mapping, f)
+
+        mapping = pickle.load(open("mapping.pkl", "rb"))
+        print(mapping)
+
+        # create the sitemap for each domain and url and store it in an xml file
+        for domain in unique_domains:
+            sitemap = self.create_sitemap(mapping[domain], 2)
+            with open(f"{domain}.xml", "w") as f:
+                f.write(sitemap)
+
+        return scraped_data
+        # return WebScraper(websites).scrape_websites()
+
+    def create_sitemap(self, base_url, depth):
+        if depth == 0:
+            return []
+
+        sitemap = [base_url]
+        try:
+            response = requests.get(base_url)
+            soup = BeautifulSoup(response.text, 'html.parser')
+
+            for link in soup.find_all('a'):
+                url = link.get('href')
+                if url:
+                    # Resolve relative links
+                    url = urljoin(base_url, url)
+                    # Check if the URL is still on the same domain
+                    if urlparse(url).netloc == urlparse(base_url).netloc:
+                        sitemap += self.create_sitemap(url, depth - 1)
+        except requests.exceptions.RequestException:
+            pass
+
+        # Remove duplicates
+        return list(set(sitemap))
 
     def scrape_sitemap(self, sitemap):
         return WebScraper(self.websites).scraped_sitemap(sitemap)
@@ -131,10 +173,10 @@ if __name__ == "__main__":
     websites = ["https://www.iiitd.ac.in/dhruv"]
     df = pd.read_csv("Combined-QnA.csv")
     temp = DataPipeline()
-    # temp.scrape_sitemap("law.xml")
-    print(temp.run_query(
-        "What is the punishment for a public servant unlawfully buying or bidding for property under Section 169 of "
-        "the IPC?"))
+    temp.scrape_websites(["https://www.latestlaws.com/bare-acts/central-acts-rules/ipc-section-166a-punishment-for-non-recording-of-information-/"])
+    # print(temp.run_query(
+    #     "What is the punishment for a public servant unlawfully buying or bidding for property under Section 169 of "
+    #     "the IPC?"))
     new_rows = []
 
     # for index, row in df.iterrows():
