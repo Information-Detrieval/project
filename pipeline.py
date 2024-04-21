@@ -34,15 +34,17 @@ path = os.getcwd()
 
 
 class DataPipeline():
-    def __init__(self):
+    def __init__(self, name):
+        self.name = name
         self.pkl_dir = os.path.join(path, "website_data", "pkl")
         self.OPENAI_API_KEY = "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"
         self.PINECONE_API_KEY = "8a73267f-d64d-4d53-a5ae-0a241afd5517"
         os.environ["OPENAI_API_KEY"] = self.OPENAI_API_KEY
         os.environ["PINECONE_API_KEY"] = self.PINECONE_API_KEY
-        self.PERSIST_DIR = os.path.join(path, "storage")
+        self.PERSIST_DIR = os.path.join(path, "storage", self.name)
         self.pinecone_index = self.initialize_pinecone()
         self.websites = ""
+        self.index = None
 
     def scrape_websites(self, websites):
         scraped_data = WebScraper(websites).scrape_websites
@@ -110,7 +112,7 @@ class DataPipeline():
     def initialize_pinecone(self):
         pc = Pinecone(api_key=self.PINECONE_API_KEY)
         try:
-            index_name = "detrieval"
+            index_name = self.name
 
             if index_name not in pc.list_indexes().names():
                 pc.create_index(
@@ -150,29 +152,34 @@ class DataPipeline():
             index.storage_context.persist(persist_dir=self.PERSIST_DIR)
             return index
 
-    def run_query(self, query_str):
-        def extract_metadata(filename):
-            json_path = filename.replace("txt", "json")
+    def initialize_documents(self, type_path):
+        vector_store = PineconeVectorStore(pinecone_index=self.pinecone_index)
 
+        def extract_metadata(filename):
+            json_path = os.path.join(path, "website_data", "meta_data", str(os.path.basename(filename)).replace(".txt", ".json"))
+            print(json_path)
             with open(json_path, "r") as f:
                 metadata = json.load(f)
             return {"title": metadata.get("title", ""), "url": metadata.get("url", "")}
 
         filename_fn = extract_metadata
-        llm = OpenAI(model="gpt-3.5-turbo-0125", api_key=self.OPENAI_API_KEY)
-        vector_store = PineconeVectorStore(pinecone_index=self.pinecone_index)
-        if os.path.exists(os.path.join(path, "website_data", "pkl", "documents.pkl")):
-            with open(os.path.join(path, "website_data", "pkl", "documents.pkl"), "rb") as f:
+
+        if os.path.exists(os.path.join(path, "website_data", "pkl", str(type_path + "_documents.pkl"))):
+            with open(os.path.join(path, "website_data", "pkl", str(type_path + "_documents.pkl")), "rb") as f:
                 documents = pickle.load(f)
         else:
             documents = SimpleDirectoryReader(
-                os.path.join(path, "website_data", "img_txt"), #changed it to img_txt
+                os.path.join(path, "website_data", str(type_path)),
                 file_metadata=filename_fn,
                 recursive=True,
             ).load_data()
-            with open(os.path.join(path, "website_data", "pkl", "documents.pkl"), "wb") as f:
+            with open(os.path.join(path, "website_data", "pkl", str(type_path) + "_documents.pkl"), "wb") as f:
                 pickle.dump(documents, f)
+        self.index = self.initialize_index(documents, vector_store)
 
+    def run_query(self, query_str):
+        llm = OpenAI(model="gpt-3.5-turbo-0125", api_key=self.OPENAI_API_KEY)
+        vector_store = PineconeVectorStore(pinecone_index=self.pinecone_index)
         # # Generate vectors for each document and add them to Pinecone along with metadata
         # for doc in documents:
         #     print(doc)
@@ -186,8 +193,7 @@ class DataPipeline():
         #         "metadata": metadata
         #     }])
 
-        index = self.initialize_index(documents, vector_store)
-        retriever = VectorIndexRetriever(index, similarity_top_k=3)
+        retriever = VectorIndexRetriever(self.index, similarity_top_k=3)
         retrieved_nodes = retriever.retrieve(query_str)
         return retrieved_nodes
 
@@ -201,8 +207,8 @@ def img_ir_pre(image_website):
         title = entry["title"]
         url = entry["url"]
         text = entry["text"]
-        image_path = os.path.join(image_website, url )
-        text_path = os.path.join(image_website, url[:len(url)-4] + ".txt")
+        image_path = os.path.join(image_website, url)
+        text_path = os.path.join(image_website, url[:len(url) - 4] + ".txt")
 
         if os.path.exists(image_path) and os.path.exists(text_path):
             shutil.copy(image_path, os.path.join("website_data/imgs", url))
@@ -218,24 +224,34 @@ def img_ir_pre(image_website):
 if __name__ == "__main__":
     websites = ["https://www.iiitd.ac.in/dhruv"]
     df = pd.read_csv("Combined-QnA.csv")
-    temp = DataPipeline()
+    img_db = DataPipeline(name="img")
     # temp.scrape_websites(["https://www.latestlaws.com/bare-acts/central-acts-rules/ipc-section-166a-punishment-for-non-recording-of-information-/"])
-    temp.scrape_sitemap("news.xml")
+    # temp.scrape_sitemap("news.xml")
     # temp.scrape_sitemap("law.xml")
-    obj = temp.run_query(
+    img_db.initialize_documents("img_txt")
+    obj = img_db.run_query(
         "I want to see a terracotta image")
     for i in range(3):
         print(obj[i].metadata['url'])
-
-        img = Image.open("website_data/imgs/" + obj[i].metadata['url'])
+        img = Image.open(os.path.join(path, "website_data", "imgs", str(obj[i].metadata['url'])))
         img = img.convert("RGB")
         img.show()
-    temp.scrape_websites([
-                             "https://www.latestlaws.com/bare-acts/central-acts-rules/ipc-section-166a-punishment-for-non-recording-of-information-/"])
-    print(temp.run_query(
+
+    text_db = DataPipeline("txt")
+    text_db.initialize_documents("txt")
+    print(text_db.run_query(
         "What is the punishment for a public servant unlawfully buying or bidding for property under Section 169 of "
         "the IPC?"))
     new_rows = []
+
+
+
+
+
+
+
+
+
 
     # for index, row in df.iterrows():
     #     print(index)

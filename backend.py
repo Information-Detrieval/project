@@ -2,20 +2,22 @@ from flask import Flask, request, jsonify
 from pipeline import DataPipeline
 
 app = Flask(__name__)
-pipeline = DataPipeline()
+pipeline_text = DataPipeline("txt")
+pipeline_img = DataPipeline("img")
 
 
 @app.route('/scrape_websites', methods=['POST'])
 def scrape_websites():
     websites = request.json['websites']
-    result = pipeline.scrape_websites(websites)
+    result = pipeline_text.scrape_websites(websites)
     return jsonify(result)
 
 
 @app.route('/scrape_sitemap', methods=['POST'])
 def scrape_sitemap():
     sitemap = request.json['sitemap']
-    result = pipeline.scrape_sitemap(sitemap)
+
+    result = pipeline_text.scrape_sitemap(sitemap)
     return jsonify(result)
 
 
@@ -24,7 +26,7 @@ def run_query():
     if request.method == 'POST':
         query_str = request.get_json()
         print(query_str['query_str'])
-        result = pipeline.run_query(query_str['query_str'])
+        result = pipeline_text.run_query(query_str['query_str'])
         print(result)
         return jsonify({"data": str(result)})
 
