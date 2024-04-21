@@ -192,7 +192,6 @@ class DataPipeline():
         return retrieved_nodes
 
 
-
 def img_ir_pre(image_website):
     json_name = "images_info.json"
     with open(json_name, "r") as f:
@@ -210,6 +209,7 @@ def img_ir_pre(image_website):
             shutil.copy(text_path, os.path.join("website_data/img_txt", title + ".txt"))
             with open(os.path.join("website_data/img_json", title + ".json"), "w") as json_file:
                 json.dump(entry, json_file, indent=4)
+
 
 # For processing images
 # image_website = "images_india"
@@ -230,10 +230,11 @@ if __name__ == "__main__":
         img = Image.open("website_data/imgs/" + obj[i].metadata['url'])
         img = img.convert("RGB")
         img.show()
-    temp.scrape_websites(["https://www.latestlaws.com/bare-acts/central-acts-rules/ipc-section-166a-punishment-for-non-recording-of-information-/"])
-    # print(temp.run_query(
-    #     "What is the punishment for a public servant unlawfully buying or bidding for property under Section 169 of "
-    #     "the IPC?"))
+    temp.scrape_websites([
+                             "https://www.latestlaws.com/bare-acts/central-acts-rules/ipc-section-166a-punishment-for-non-recording-of-information-/"])
+    print(temp.run_query(
+        "What is the punishment for a public servant unlawfully buying or bidding for property under Section 169 of "
+        "the IPC?"))
     new_rows = []
 
     # for index, row in df.iterrows():
