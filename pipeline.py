@@ -25,6 +25,8 @@ from llama_index.vector_stores.pinecone import PineconeVectorStore
 from pinecone import Pinecone, ServerlessSpec
 from scrape import WebScraper
 import pandas as pd
+import shutil
+from PIL import Image
 
 path = os.getcwd()
 
@@ -131,6 +133,7 @@ class DataPipeline():
     def run_query(self, query_str):
         def extract_metadata(filename):
             json_path = filename.replace("txt", "json")
+
             with open(json_path, "r") as f:
                 metadata = json.load(f)
             return {"title": metadata.get("title", ""), "url": metadata.get("url", "")}
@@ -143,7 +146,7 @@ class DataPipeline():
                 documents = pickle.load(f)
         else:
             documents = SimpleDirectoryReader(
-                os.path.join(path, "website_data", "txt"),
+                os.path.join(path, "website_data", "img_txt"), #changed it to img_txt
                 file_metadata=filename_fn,
                 recursive=True,
             ).load_data()
@@ -169,10 +172,42 @@ class DataPipeline():
         return retrieved_nodes
 
 
+
+def img_ir_pre(image_website):
+    json_name = "images_info.json"
+    with open(json_name, "r") as f:
+        img_json_file = json.load(f)
+
+    for entry in img_json_file:
+        title = entry["title"]
+        url = entry["url"]
+        text = entry["text"]
+        image_path = os.path.join(image_website, url )
+        text_path = os.path.join(image_website, url[:len(url)-4] + ".txt")
+
+        if os.path.exists(image_path) and os.path.exists(text_path):
+            shutil.copy(image_path, os.path.join("website_data/imgs", url))
+            shutil.copy(text_path, os.path.join("website_data/img_txt", title + ".txt"))
+            with open(os.path.join("website_data/img_json", title + ".json"), "w") as json_file:
+                json.dump(entry, json_file, indent=4)
+
+# For processing images
+# image_website = "images_india"
+# img_ir_pre(image_website)
+
 if __name__ == "__main__":
     websites = ["https://www.iiitd.ac.in/dhruv"]
     df = pd.read_csv("Combined-QnA.csv")
     temp = DataPipeline()
+    # temp.scrape_sitemap("law.xml")
+    obj = temp.run_query(
+        "I want to see a terracotta image")
+    for i in range(3):
+        print(obj[i].metadata['url'])
+
+        img = Image.open("website_data/imgs/" + obj[i].metadata['url'])
+        img = img.convert("RGB")
+        img.show()
     temp.scrape_websites(["https://www.latestlaws.com/bare-acts/central-acts-rules/ipc-section-166a-punishment-for-non-recording-of-information-/"])
     # print(temp.run_query(
     #     "What is the punishment for a public servant unlawfully buying or bidding for property under Section 169 of "
