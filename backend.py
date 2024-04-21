@@ -6,7 +6,10 @@ app = Flask(__name__)
 CORS(app)
 
 pipeline_text = DataPipeline("txt")
+pipeline_text.initialize_documents("txt")
+
 pipeline_img = DataPipeline("img")
+pipeline_img.initialize_documents("img_txt")
 
 
 @app.route('/scrape_websites', methods=['POST'])
