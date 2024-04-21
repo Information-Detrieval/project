@@ -134,7 +134,7 @@ class DataPipeline():
             transformations=[
                 SentenceSplitter(
                     chunk_overlap=200,
-                    chunk_size=1024,
+                    chunk_size=3072,
                 ),
                 embed_model,
             ],
@@ -160,7 +160,7 @@ class DataPipeline():
             print(json_path)
             with open(json_path, "r") as f:
                 metadata = json.load(f)
-            return {"title": metadata.get("title", ""), "url": metadata.get("url", "")}
+            return {"title": metadata.get("title", ""), "url": metadata.get("url", ""), "html": metadata.get("html", "")}
 
         filename_fn = extract_metadata
 

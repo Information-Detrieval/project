@@ -34,7 +34,7 @@ def run_query():
         print(query_str['query_str'])
         result = pipeline_text.run_query(query_str['query_str'])
         print(result)
-        reply = result[0].metadata['html']
+        reply = result[0].metadata['html'] if 'html' in result[0].metadata else result[0].text
         url = result[0].metadata['url']
 
         reply = f"<a href='{url}'>{url}</a><br/><br/>{reply}"
