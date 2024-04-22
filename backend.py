@@ -28,6 +28,9 @@ def scrape_websites():
 
 @app.route('/scrape_sitemap', methods=['POST'])
 def scrape_sitemap():
+    os.system("rm -rf storage/")
+    os.system("rm -rf website_data/pkl")
+    os.system("mkdir -p website_data/pkl")
     website = request.get_json()['website']
     result = pipeline_text.scrape_sitemap(website)
     return jsonify(result)
