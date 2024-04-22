@@ -58,7 +58,7 @@ class WebScraper:
         self.websites = websites
         self.html_dir = os.path.join(os.getcwd(), "website_data", "html")
         self.pkl_dir = os.path.join(os.getcwd(), "website_data", "txt")
-        self.json_dir = os.path.join(os.getcwd(), "website_data", "json")
+        self.json_dir = os.path.join(os.getcwd(), "website_data", "meta_data")
         self.mapping_file = "mapping.pkl"
 
         os.makedirs(self.html_dir, exist_ok=True)
@@ -118,7 +118,6 @@ class WebScraper:
 
         # with open(self.mapping_file, "wb") as f:
         #     pickle.dump(mapping, f)
-
         return self.html_dir, self.pkl_dir
 
     def get_html(self, website):

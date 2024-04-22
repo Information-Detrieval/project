@@ -1,3 +1,5 @@
+import os
+
 from flask import Flask, request, jsonify
 from pipeline import DataPipeline
 from flask_cors import CORS
@@ -15,7 +17,12 @@ pipeline_img.initialize_documents("img_txt")
 @app.route('/scrape_websites', methods=['POST'])
 def scrape_websites():
     websites = request.get_json()['websites']
+    # delete Scraping/
+    os.system("rm -rf storage/")
+    os.system("rm -rf website_data/pkl")
+    os.system("mkdir -p website_data/pkl")
     result = pipeline_text.scrape_websites(websites)
+    pipeline_text.initialize_documents("txt")
     return jsonify({})
 
 
@@ -33,10 +40,14 @@ def run_query():
         print(query_str['query_str'])
         result = pipeline_text.run_query(query_str['query_str'])
         print(result)
-        reply = result[0].metadata['html']
-        url = result[0].metadata['url']
+        reply = None
+        try:
+            reply = result['result']
+        except Exception as e:
+            reply = result[0].metadata['html'] if 'html' in result[0].metadata else result[0].text
+            url = result[0].metadata['url']
 
-        reply = f"<a href='{url}'>{url}</a><br/><br/>{reply}"
+            reply = f"<a href='{url}'>{url}</a><br/><br/>{reply}"
         return jsonify({"data": reply})
 
 

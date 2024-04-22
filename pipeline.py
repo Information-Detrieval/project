@@ -34,7 +34,6 @@ from langchain_pinecone import PineconeVectorStore as langchainVectorStore
 from langchain_openai import ChatOpenAI
 from langchain.chains import RetrievalQA
 
-
 path = os.getcwd()
 
 
@@ -52,7 +51,7 @@ class DataPipeline():
         self.index = None
 
     def scrape_websites(self, websites):
-        scraped_data = WebScraper(websites).scrape_websites
+        scraped_data = WebScraper(websites).scrape_websites()
         unique_domains = list(set([urlparse(website).netloc for website in websites]))
         mapping = {urlparse(website).netloc: website for website in websites}
         with open("mapping.pkl", "wb") as f:
@@ -161,7 +160,8 @@ class DataPipeline():
         vector_store = PineconeVectorStore(pinecone_index=self.pinecone_index)
 
         def extract_metadata(filename):
-            json_path = os.path.join(path, "website_data", "meta_data", str(os.path.basename(filename)).replace(".txt", ".json"))
+            json_path = os.path.join(path, "website_data", "meta_data",
+                                     str(os.path.basename(filename)).replace(".txt", ".json"))
             print(json_path)
             with open(json_path, "r") as f:
                 metadata = json.load(f)
@@ -183,6 +183,7 @@ class DataPipeline():
         self.index = self.initialize_index(documents, vector_store)
 
     def run_query(self, query_str):
+        return self.generativeQnA(query_str)
         llm = OpenAI(model="gpt-3.5-turbo-0125", api_key=self.OPENAI_API_KEY)
         vector_store = PineconeVectorStore(pinecone_index=self.pinecone_index)
         # # Generate vectors for each document and add them to Pinecone along with metadata
@@ -198,9 +199,37 @@ class DataPipeline():
         #         "metadata": metadata
         #     }])
 
-        retriever = VectorIndexRetriever(self.index, similarity_top_k=3)
+        retriever = VectorIndexRetriever()
         retrieved_nodes = retriever.retrieve(query_str)
         return retrieved_nodes
+
+    def generativeQnA(self, query):
+        model_name = 'text-embedding-ada-002'
+        embed = OpenAIEmbeddings(
+            model=model_name,
+            openai_api_key=self.OPENAI_API_KEY
+        )
+
+        text_field = "url"  # the metadata field that contains our context
+
+        vector_store = langchainVectorStore(self.pinecone_index, embed, text_field)
+
+        # completion llm
+        llm = ChatOpenAI(
+            openai_api_key=self.OPENAI_API_KEY,
+            model_name='gpt-3.5-turbo',
+            temperature=0.0
+        )
+        x: VectorStoreIndex
+
+
+        qa = RetrievalQA.from_chain_type(
+            llm=llm,
+            chain_type="stuff",
+            retriever=VectorIndexRetriever(self.index)
+        )
+
+        return qa.invoke(query)
 
 
 def img_ir_pre(image_website):
@@ -225,34 +254,6 @@ def img_ir_pre(image_website):
 # For processing images
 # image_website = "images_india"
 # img_ir_pre(image_website)
-
-def generativeQnA(data, query):
-    model_name = 'text-embedding-ada-002'
-    embed = OpenAIEmbeddings(
-            model=model_name,
-            openai_api_key=data.OPENAI_API_KEY
-            )
-    
-    text_field = "url"  # the metadata field that contains our context
-
-    vector_store = langchainVectorStore(data.pinecone_index, embed, text_field)
-    
-    # completion llm
-    llm = ChatOpenAI(
-        openai_api_key=data.OPENAI_API_KEY,
-        model_name='gpt-3.5-turbo',
-        temperature=0.0
-    )
-
-    qa = RetrievalQA.from_chain_type(
-        llm=llm,
-        chain_type="stuff",
-        retriever=vector_store.as_retriever()
-    )
-    
-    return qa.invoke(query)
-    
-    
 
 
 if __name__ == "__main__":
@@ -281,15 +282,6 @@ if __name__ == "__main__":
     # data = DataPipeline("txt")
     # data.initialize_documents("txt")
     # print(generativeQnA(data, "What is the punishment for a public servant unlawfully buying or bidding for property under Section 169 of the IPC"))
-    
-
-
-
-
-
-
-
-
 
     # for index, row in df.iterrows():
     #     print(index)
