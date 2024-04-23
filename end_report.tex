@@ -111,6 +111,9 @@
 
 %%
 %% end of the preamble, start of the body of the document source.
+
+\usepackage{booktabs} % For better tables
+\usepackage{tabularx} % For width-adjustable tables
 \begin{document}
 
 %%
@@ -165,7 +168,6 @@
 % </concept>
 % </ccs2012>
 % \end{CCSXML}
-
 \ccsdesc[300]{Information systems~Information retrieval}
 %%
 %% Keywords. The author(s) should pick words that accurately describe
@@ -191,6 +193,8 @@
 %%
 %% This command processes the author and affiliation and title
 %% information and builds the first part of the formatted document.
+
+
 \maketitle
 
 \section{Introduction}
@@ -252,12 +256,12 @@ In alignment with the principles laid out in the RAG paper, our work focuses on 
 
 \section{Pipeline}
 
-\begin{figure}[H]
+\begin{figure*}[h]
     \centering
-    \includegraphics[width=\linewidth]{Pipeline.pdf}
+    \includegraphics[width=0.85\linewidth]{IR_Project.png}
     \caption{Data Pipeline}
     \label{fig:enter-label}
-\end{figure}
+\end{figure*}
 
 The \textit{DataPipeline} class in our code is designed to scrape websites, initialize a Pinecone index, initialize a vector store index, and run queries on the index. Here is a detailed description of all the individual steps:
 
@@ -265,42 +269,67 @@ The \textit{DataPipeline} class in our code is designed to scrape websites, init
 
 \item \textbf{Web scraping:} The \textit{scrape\_websites} method is used to scrape each website in the list. It sends a GET request to the website, parses the HTML response using BeautifulSoup 4, and extracts the text content. A \textbf{domain-specific custom CSS-based selector} is used to locate useful content on the scraped page.
 \newline
-\newline
-The text content is then cleaned to remove repeated blank lines. Additionally, we also save the URL and title (after stopword removal and lemmatization) of the page as the \textbf{supporting metadata}. The cleaned text and the original HTML are saved to separate files in the local storage. The method also maintains a mapping of websites to their corresponding data files.
+The text content is then cleaned to remove repeated blank lines. The images and their repsective ALT text are stored in separate folders \"img\" and \"img\_txt\".Additionally, we also save the URL and title (after stopword removal and lemmatization) of the page as the \textbf{supporting metadata}. The cleaned text and the original HTML are saved to separate files in the local storage. The meta data is stored in a json file for each web-page and image respectively. The method also maintains a mapping of websites to their corresponding data files.
 
-\item \textbf{Pinecone Initialization:} Pinecone is a vector database service that allows you to store, search, and retrieve high-dimensional vectors. In the \textit{initialize\_pinecone} method, a Pinecone index named "detrieval" is created if it doesn't exist. This index will be used to store and retrieve vectors.  
+\item \textbf{Pinecone Initialization:} Pinecone is a vector database service that allows you to store, search, and retrieve high-dimensional vectors. In the \textit{initialize\_pinecone} method we create two separate pinecone for page text and image ALT text respectively. These indices will be used to store and retrieve vectors.  
 
-\item \textbf{Index Initialization:} The \textit{initialize\_index} method is used to initialize a vector store index. This index is created by running an ingestion pipeline on the documents. The pipeline includes a sentence splitter and an embedding model. The sentence splitter breaks the documents into sentences, and the embedding model transforms these sentences into high-dimensional vectors. These vectors are then stored in the vector store index. 
+\item \textbf{Index Initialization:} The \textit{initialize\_index} method is used to initialize a vector store index. This index is created by running an ingestion pipeline on the documents. The pipeline includes a sentence splitter and an embedding model. The sentence splitter breaks the documents and ALT texts into sentences, and the embedding model transforms these sentences into high-dimensional vectors. These vectors are then stored in separate vector store indices. 
 
 Fundamentally there are two filtering methods with vectors: pre and post filtering. Pinecone utilizes a Single-Stage Filtering algorithm giving benefits of pre-filtering accuracy without being restricted to small datasets. Additionally, we have implemented a function which is responsible to add metadata into vector store aiding in First Stage Filtering.
 
-\item \textbf{Running Queries:} The \textit{run\_query} method is used to run a query on the index. It first checks if the documents are pickled and loads them if they are. If not, it reads the documents from a directory and pickles them for future use. It then initializes the index and a retriever. The retriever is used to retrieve the top 3 similar nodes to the query string from the index. This is done by transforming the query string into a vector using the same embedding model, and then retrieving the vectors in the index that are most similar to the query vector.
+\item \textbf{Running Queries:} The \textit{run\_query} method is used to run a query on the index. It first checks if the documents are pickled and loads them if they are. If not, it reads the documents from a directory and pickles them for future use. It then initializes the index and a retriever. The retriever is used to retrieve the top 3 similar nodes to the query string from the page text index and image ALT text index respectively. This is done by transforming the query string into a vector using the same embedding model, and then retrieving the vectors in the indices that are most similar to the query vector, for the image ALT text vectors we further check if they are relevant or not by using a threshold of 0.6 and only relevant ones are retrieved. 
+
+\item \textbf{Output Generation:} The retrieved page text vectors are then forwarded to a Large Language Model (LLM) for generating replies and the generated text along with retrieved images are returned to the user.
 \end{itemize}
 
 \section{Experiments and Result}
-\subsection{Query Generation}
+\subsection{Methodology}
+\subsubsection{\textbf{Query Generation}}
 For testing our pipeline, we generated some queries from our corpora of documents. This was done to check the ability of our employed retrieval pipeline to retrieve accurate and relevant documents upon being prompted with a query. The following steps are followed for this process:
 \begin{itemize}
-    \item Websites from the IIITD domain such as the ones about \textit{B.Tech Project, Guest House, Hostels, Mess, Student Affairs} etc and Taj were scraped and stored as \textit{.txt} files. These served as the document corpus for our experimentation. In total the corpus consisted of \textbf{10 such documents} for each website on which our pipeline will perform retrieval.
+    \item Websites from the IIITD domain such as the ones about \textit{B.Tech Project, Guest House, Hostels, Mess, Student Affairs} etc, Taj and Legal Law were scraped and stored as \textit{.txt} files. These served as the document corpus for our experimentation. In total the corpus consisted of \textbf{10 such documents} for each website on which our pipeline will perform retrieval.
     \item Each \textit{.txt} file was copied and was then input to OpenAI's ChatGPT chatbot \footnote{https://openai.com/blog/chatgpt} with the \textbf{zero-shot prompt}: \newline \emph{You are a question setter. Go through the text given to you and give 5 question-answer pairs from it}.
-    \item This prompt generates 5 candidate question-answer pairs for each document. We select the top 2 queries from this and feed it into a pool of queries to test our retrieval system on.
+    \item This prompt generates 5 candidate question-answer pairs for each document. We select the top 2 queries from this and feed it into a pool of queries to test our retrieval system on. The total number of selected queries for retrieval is 50.
 \end{itemize}
 
+\subsubsection{\textbf{Benchmarking of LLMs: }}
+
+For benchmarking different large language models (LLMs), we leveraged the \textbf{WikiQA dataset} \cite{yang-etal-2015-wikiqa}, a collection of question-answer pairs based on Wikipedia content. This dataset aids in assessing the models' capabilities in natural language understanding and generation. The evaluation process integrates the \textbf{retrieval-augmentation-generation (RAG)} technique, where models first retrieve relevant information before generating answers.
+
+\begin{itemize}
+    \item \textbf{Dataset and Technique:} We use the \textbf{WikiQA dataset} \cite{yang-etal-2015-wikiqa} to evaluate the models' performance. This involves feeding the LLMs with a query, general instructions, and the retrieved context, employing the RAG technique to enhance relevance and accuracy.
+    \item \textbf{Models Benchmarked:} The LLMs benchmarked include \emph{Mixtral-7x8b} \cite{jiang2024mixtral}, \emph{LLAMA-3-8b} \cite{touvron2023llama}, \emph{Gemma-7b} \cite{gemmateam2024gemma}, and \emph{GPT-3.5-turbo} \cite{brown2020language}. These models were selected based on their diverse architectures and capacities.
+    \item \textbf{Procedure:} For each model, we retrieve the most relevant Wikipedia pages using the Hugging Face Wikipedia corpus. The retrieved pages then serve as context for the LLMs, which are tasked with generating an answer to the query.
+    \item \textbf{Evaluation Metrics:} The effectiveness of each model is measured using BLEU-score, METEOR-score, and BERTscore metrics (precision, recall, and F1-score). These metrics help quantify the accuracy and relevance of the generated answers compared to the actual answers in the WikiQA dataset.
+\end{itemize}
+
+
+
 \subsection{Evaluation Metrics}
+
+\subsubsection{\textbf{Query Retrieval:}}
+\newline
 Since this report details our baseline experiments for the retrieval setup, we employ the following binary relevancy metrics for evaluating our system. Based on the query generation, there is one relevant document for each input query. 
 \begin{enumerate}
     \item \textbf{Precision@K}: Is the proportion of retrieved documents in the top K results that are relevant. Since there's only one relevant document per query, Precision@K will be 1 if the relevant document is within the top K results, and 0 otherwise.
-    \item \textbf{Recall@K}: Measures the proportion of relevant documents that are retrieved in the top K results out of all relevant documents. Since there is only one relevant document for each query, Recall@K is 1 if the relevant document is within the top K results and 0 if it is not.
-    \item \textbf{F1@K}: The F1 score at K is the harmonic mean of Precision@K and Recall@K. Given that there's only one relevant document per query, F1@K essentially measures the balance between Precision@K and Recall@K. Because Precision@K and Recall@K will always be the same, F1@K will also mirror those values.
-    \item Mean Average Precision (MAP): Mean Average Precision (MAP) is a metric that calculates the average precision across all relevant documents for each query in information retrieval tasks, providing a comprehensive measure of system accuracy.
+    % \item \textbf{Recall@K}: Measures the proportion of relevant documents that are retrieved in the top K results out of all relevant documents. Since there is only one relevant document for each query, Recall@K is 1 if the relevant document is within the top K results and 0 if it is not.
+    % \item \textbf{F1@K}: The F1 score at K is the harmonic mean of Precision@K and Recall@K. Given that there's only one relevant document per query, F1@K essentially measures the balance between Precision@K and Recall@K. Because Precision@K and Recall@K will always be the same, F1@K will also mirror those values.
+    \item \textbf{Mean Average Precision (MAP):} Mean Average Precision (MAP) is a metric that calculates the average precision across all relevant documents for each query in information retrieval tasks, providing a comprehensive measure of system accuracy.
 \end{enumerate}
 
 We have a total of 20 generated queries with their most relevant document (i.e. the ground truth) as described in the previous section. We prompt these 20 queries one by one to the pipeline and retrieve the \textbf{3 most relevant documents}. We then evaluate against the ground truth for testing the robustness of our system. 
 
+\subsubsection{\textbf{LLM Benchmarking:}}
+To benchmark large language models (LLMs) effectively on text generation tasks, a mix of qualitative and quantitative metrics is essential. These metrics evaluate the text's coherence, relevance, and fluency. Common automated metrics include BLEU, which measures n-gram overlap with reference texts; METEOR, which accounts for synonymy and stemming; and BERTScore, which assesses semantic similarity using contextual embeddings from models like BERT. Combining these metrics with human evaluations ensures a comprehensive assessment across diverse linguistic scenarios. In our analysis, we utilized BLEU, METEOR, and BERTScore for a detailed evaluation of LLM performance.
+\begin{enumerate}
+    \item \textbf{BLEU} \cite{papineni2002bleu}: BLEU measures the similarity between machine-generated text and one or more reference texts by counting the matching n-grams, providing a score that reflects how natural the translation or generated content appears. The reported BLEU score is an average of the BLEU-1, BLEU-2, BLEU-3 and BLEU-4 scores.
+    \item \textbf{METEOR} \cite{banerjee2005meteor}: METEOR improves upon BLEU by including synonyms and stemming in its evaluation, allowing for a more nuanced understanding of language use. It aligns better with human judgment by accounting for both precision and recall.
+    \item \textbf{BERTScore} \cite{zhang2019bertscore}: BERTScore leverages the deep contextual embeddings from pre-trained models like BERT to calculate the semantic similarity between the generated text and the reference text. This metric focuses on the contextual alignment of words, offering a sophisticated assessment of content quality.
 
+\end{enumerate}
 
 \subsection{Results}
-
+\subsubsection{\textbf{Query Retrieval: }}
 This section describes the results obtained by our system on the evaluation metrics and experiments described in the previous section. The results using cosine similarity for retrieval are summarised in the table \ref{tab:metrics} for IIIT Delhi website and in table \ref{tab:metrics_taj} for Taj Mahal website. 
 
 We report the metrics Precision@K, Recall@K and F1@K averaged over the 20 queries used by us to test the system. Thus we refer to it as an average of those values. The values @1 are high indicating our system's robust ability to retrieve the relevant document as the first one itself. Precision values @2 and @3 are lower because of there being only one relevant document in this current experiment. This is also reflected by our Recall@K values being 1 for $K=2, K=3$ which means all relevant documents are retrieved. The further robustness of our system is validated by the high Mean Average Precision (MAP) value reported in the end.
@@ -309,10 +338,10 @@ We report the metrics Precision@K, Recall@K and F1@K averaged over the 20 querie
 \centering
 \begin{tabular}{cccc}
 \hline
-\textbf{K} & \textbf{Avg Precision@K} & \textbf{Avg Recall@K} & \textbf{ Avg F1@K} \\ \hline
-1          & 0.85                 & 0.85              & 0.85          \\
-2          & 0.5                  & 1                 & 0.66          \\
-3          & 0.33                 & 1                 & 0.496         \\ 
+\textbf{K} & \textbf{Avg Precision}\\ \hline
+1          & 0.85                \\
+2          & 0.5                \\
+3          & 0.33                     \\ 
 \hline
 &\textbf{MAP}        &0.925& \\
 \hline
@@ -325,10 +354,10 @@ We report the metrics Precision@K, Recall@K and F1@K averaged over the 20 querie
 \centering
 \begin{tabular}{cccc}
 \hline
-\textbf{K} & \textbf{Avg Precision@K} & \textbf{Avg Recall@K} & \textbf{ Avg F1@K} \\ \hline
-1          & 0.88                & 0.88              & 0.88          \\
-2          & 0.47                 & 0.94                 & 0.63          \\
-3          & 0.31                 & 0.94              & 0.47         \\ 
+\textbf{K} & \textbf{Avg Precision}  \\ \hline
+1          & 0.88                \\
+2          & 0.47                      \\
+3          & 0.31                \\ 
 \hline
 &\textbf{MAP}        &0.916& \\
 \hline
@@ -343,10 +372,10 @@ We report the metrics Precision@K, Recall@K and F1@K averaged over the 20 querie
 \centering
 \begin{tabular}{cccc}
 \hline
-\textbf{K} & \textbf{Avg Precision@K} & \textbf{Avg Recall@K} & \textbf{ Avg F1@K} \\ \hline
-1          & 0.89                 & 0.89              & 0.89          \\
-2          & 0.56                  & 0.95                 & 0.71          \\
-3          & 0.41                 & 0.97                 & 0.58         \\ 
+\textbf{K} & \textbf{Avg Precision}\\ \hline
+1          & 0.89                         \\
+2          & 0.56                      \\
+3          & 0.41                      \\ 
 \hline
 &\textbf{MAP}        &0.932& \\
 \hline
@@ -354,6 +383,51 @@ We report the metrics Precision@K, Recall@K and F1@K averaged over the 20 querie
 \caption{Combined Pipeline Results for all 3 websites}
 \label{tab:metrics_combined}
 \end{table}
+
+\begin{table}[h]
+\centering
+\begin{tabular}{cccc}
+\hline
+\textbf{K} & \textbf{Avg Precision} \\ \hline
+1          & 0.93                   \\
+2          & 0.68                           \\
+3          & 0.52                    \\ 
+\hline
+&\textbf{MAP}        &0.96& \\
+\hline
+\end{tabular}
+\caption{Updated Combined Pipeline Results for all 3 websites}
+\label{tab:metrics_combined}
+\end{table}
+
+
+
+
+
+
+\begin{table}[ht]
+    \centering
+    \small
+    \begin{tabular}{|c|c|c|c|c|c|}
+        \hline
+        \textbf{Model} & \textbf{BLEU} & \textbf{METEOR} & \textbf{B-P} & \textbf{B-R} & \textbf{B-F1} \\
+        \hline
+        Mixtral-8x7b & 0.013 & 0.183 & 0.55 & 0.675 & 0.605 \\
+        \hline
+        LLAMA-3-8b & 0.012 & 0.171 & 0.595 & 0.672 & 0.628 \\
+        \hline
+        Gemma-7b & 0.009 & 0.113 & 0.627 & 0.660 & 0.641 \\
+        \hline
+        GPT-3.5-turbo & \textbf{0.021}& \textbf{0.232} & \textbf{0.654} & \textbf{0.713} & \textbf{0.687} \\
+        \hline
+    \end{tabular}
+    \vspace{0.25cm}
+    \caption{Performance comparison of different LLMs on various metrics. \textbf{B-P:} BERT-Precision, \textbf{B-R:} BERT-Recall, \textbf{B-F1:} BERT-F1.}
+    \label{tab:performance_comparison}
+\end{table}
+
+\subsubsection{\textbf{LLM Benchmarking Results: }}
+Based on our LLM benchmarking evaluation metrics, we observe that GPT-3.5-Turbo is performing the best, closely followed by Mixtral-8x7b, LLAMA 3-8b and Gemma-7b respectively. Hence, in our final pipeline, we are using the GPT-3.5-Turbo as our LLM.
 
 \section{Potential Contributions}
 Our contribution in this work will be developing a pipeline capable of chatting with the user and retrieving answers based on queries on pages they are surfing. This will be provided by an extension that exists as an overlay of the browser. We also aim to involve multimodal retrieval by allowing Q\&A over images and audio data. This will be supported by multiple multimodal input and output channels according to the query. Our contributions will be vital in making open-source products which can be helpful for understanding focused context and improve grounding.
