@@ -93,7 +93,8 @@ class DataPipeline():
 
             # Write the XML data to the file
             tree = ET.ElementTree(urlset)
-            tree.write(f"{domain}.xml", encoding='utf-8', xml_declaration=True)
+            path_sitemap = os.path.join(path, "website_data", "sitemaps", domain + ".xml")
+            tree.write(path_sitemap, encoding='utf-8', xml_declaration=True)
 
         return scraped_data
         # return WebScraper(websites).scrape_websites()
@@ -120,7 +121,13 @@ class DataPipeline():
             pass
 
         # Remove duplicates
-        return list(set(sitemap))
+        sitemap = list(set(sitemap))
+
+        # Save sitemap to a file
+        with open("sitemap.xml", 'w') as f:
+            json.dump(sitemap, f)
+
+        return sitemap
 
     def scrape_sitemap(self, sitemap):
         return WebScraper(self.websites).scraped_sitemap(sitemap)
