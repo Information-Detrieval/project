@@ -31,5 +31,4 @@ Backend of the Information Detrevial
     - Delete the pkl/documents.pkl file
 8. Add the new sitemap locaiton `scrape_sitemap("law.xml")` line of the code.
 
-8. Run `python pipeline.py`. You would see a loading bar in the console that shows that the vectors have been upserterd. If not please redo the step 7.
-9. If running with old data and testing on retreival, run `python pipeline.py`.
+8. Run `python backend.py`. You would see a loading bar in the console that shows that the vectors have been upserterd. If not please redo the step 7.
