@@ -10,12 +10,17 @@ import xml.etree.ElementTree as ET
 
 import requests
 from bs4 import BeautifulSoup
+from langchain import hub
+from langchain.chains.combine_documents.stuff import StuffDocumentsChain, create_stuff_documents_chain
+from langchain.chains.openai_functions import create_structured_output_chain, create_openai_fn_chain
+from langchain.chains.retrieval import create_retrieval_chain
+from langchain_core.messages import SystemMessage, HumanMessage
+from langchain_core.prompts import HumanMessagePromptTemplate, ChatPromptTemplate, PromptTemplate
 from llama_index.core import (
     VectorStoreIndex,
     SimpleDirectoryReader,
     load_index_from_storage,
     Settings,
-    PromptTemplate,
 )
 from llama_index.core.ingestion import IngestionPipeline
 from llama_index.core.node_parser import SentenceSplitter
@@ -25,6 +30,9 @@ from llama_index.embeddings.openai import OpenAIEmbedding
 from llama_index.llms.openai import OpenAI
 from llama_index.vector_stores.pinecone import PineconeVectorStore
 from pinecone import Pinecone, ServerlessSpec
+from pydantic import BaseModel
+from pydantic.v1 import Field
+
 from scrape import WebScraper
 import pandas as pd
 import shutil
@@ -36,6 +44,8 @@ from langchain.chains import RetrievalQA
 
 path = os.getcwd()
 
+class Answer(BaseModel):
+    reply :str = Field( description="The output")
 
 class DataPipeline():
     def __init__(self, name):
@@ -183,7 +193,6 @@ class DataPipeline():
         self.index = self.initialize_index(documents, vector_store)
 
     def run_query(self, query_str):
-        return self.generativeQnA(query_str)
         llm = OpenAI(model="gpt-3.5-turbo-0125", api_key=self.OPENAI_API_KEY)
         vector_store = PineconeVectorStore(pinecone_index=self.pinecone_index)
         # # Generate vectors for each document and add them to Pinecone along with metadata
@@ -203,7 +212,40 @@ class DataPipeline():
         retrieved_nodes = retriever.retrieve(query_str)
         return retrieved_nodes
 
-    def generativeQnA(self, query):
+    def invoke(self, query):
+
+        pipeline_img = DataPipeline("img")
+        pipeline_img.initialize_documents("imgs_txt")
+        img_output = pipeline_img.run_query(query)
+        if len(img_output) > 0 and img_output[0].score < 0.55:
+            img_output = []
+        llm = ChatOpenAI(
+            openai_api_key=self.OPENAI_API_KEY,
+            model_name='gpt-3.5-turbo',
+            temperature=0.0
+        )
+
+        retrieval_qa_chat_prompt = ChatPromptTemplate.from_template("""Answer the following question based 
+        only on the provided context. Provide detailed answers and provide output in html, along with appropriate use 
+        of headings, bold and italic text:
+            
+            <context>
+            {context}
+            </context>
+            
+            Question: {input}
+            
+            """+("" if len(img_output) == 0 else """
+            Also, add the provided image URL to the appropriate place in the output if the provided image description seems relevant:
+            Image URL: {img_url}
+            Image Description: {img_desc}
+            """))
+
+        combine_docs_chain = create_stuff_documents_chain(
+            llm,
+            retrieval_qa_chat_prompt
+        )
+
         model_name = 'text-embedding-ada-002'
         embed = OpenAIEmbeddings(
             model=model_name,
@@ -214,23 +256,15 @@ class DataPipeline():
 
         vector_store = langchainVectorStore(self.pinecone_index, embed, text_field)
 
-        # completion llm
-        llm = ChatOpenAI(
-            openai_api_key=self.OPENAI_API_KEY,
-            model_name='gpt-3.5-turbo',
-            temperature=0.0
-        )
-
         retriever = vector_store.as_retriever()
+        retrieval_chain = create_retrieval_chain(retriever, combine_docs_chain)
 
-
-        qa = RetrievalQA.from_chain_type(
-            llm=llm,
-            chain_type="stuff",
-            retriever=retriever
-        )
-
-        return qa.invoke(query)
+        invocation_input = {"input": query}
+        if len(img_output) > 0:
+            invocation_input["img_url"] = img_output[0].metadata['url']
+            invocation_input["img_desc"] = img_output[0].text
+        reply = retrieval_chain.invoke(invocation_input)
+        return reply
 
 
 def img_ir_pre(image_website):

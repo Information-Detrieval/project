@@ -10,8 +10,7 @@ CORS(app)
 pipeline_text = DataPipeline("txt")
 pipeline_text.initialize_documents("txt")
 
-pipeline_img = DataPipeline("img")
-pipeline_img.initialize_documents("img_txt")
+
 
 
 @app.route('/scrape_websites', methods=['POST'])
@@ -41,11 +40,10 @@ def run_query():
     if request.method == 'POST':
         query_str = request.get_json()
         print(query_str['query_str'])
-        result = pipeline_text.run_query(query_str['query_str'])
+        result = pipeline_text.invoke(query_str['query_str'])
         print(result)
-        reply = None
         try:
-            reply = result['result']
+            reply = result['answer']
         except Exception as e:
             reply = result[0].metadata['html'] if 'html' in result[0].metadata else result[0].text
             url = result[0].metadata['url']
