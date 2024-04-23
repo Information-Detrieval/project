@@ -2,7 +2,8 @@ import requests
 from xml.etree import ElementTree as ET
 from urllib.parse import urljoin
 
-MAX_DEPTH = 1  
+MAX_DEPTH = 1
+
 
 def fetch_sitemap_content(url):
     """
@@ -15,6 +16,7 @@ def fetch_sitemap_content(url):
     except requests.RequestException as e:
         return None
 
+
 def add_sitemap_or_url(parent_element, url, is_sitemap=False):
     """
     Adds a sitemap or URL element to the parent element.
@@ -26,17 +28,18 @@ def add_sitemap_or_url(parent_element, url, is_sitemap=False):
         url_element = ET.SubElement(parent_element, 'url')
         ET.SubElement(url_element, 'loc').text = url
 
+
 def parse_sitemap_to_xml(content, base_url, parent_element, depth=0):
     """
     Parses sitemap content and constructs an XML structure with URLs.
     """
     if depth > MAX_DEPTH:
         return
-    
+
     try:
         sitemap = ET.fromstring(content)
         namespace = {'ns': sitemap.tag.split('}')[0].strip('{')}
-        
+
         # Check if this is a sitemap index or a regular sitemap
         for loc_tag in sitemap.findall('.//ns:loc', namespaces=namespace):
             url = urljoin(base_url, loc_tag.text)
@@ -53,6 +56,7 @@ def parse_sitemap_to_xml(content, base_url, parent_element, depth=0):
     except ET.ParseError as e:
         print(f"Failed to parse XML: {e}")
 
+
 def get_sitemap_as_xml(url):
     """
     Fetches and parses the sitemap of a given website into an XML structure.
@@ -67,10 +71,12 @@ def get_sitemap_as_xml(url):
     else:
         return ''
 
-website_url = 'https://www.latestlaws.com/'
 
-sitemap_url = website_url.rstrip('/') + '/sitemap.xml'
-print(requests.get(sitemap_url).content) #REAL SITEMAP OF THE GIVEN WEBSITE  
+if __name__ == "__main__":
+    website_url = 'https://www.latestlaws.com/'
 
-sitemap_xml = get_sitemap_as_xml(website_url)
-print(f"XML representation of the sitemap:\n{sitemap_xml}") #PARSED AND CREATED 
+    sitemap_url = website_url.rstrip('/') + '/sitemap.xml'
+    print(requests.get(sitemap_url).content)  #REAL SITEMAP OF THE GIVEN WEBSITE
+
+    sitemap_xml = get_sitemap_as_xml(website_url)
+    print(f"XML representation of the sitemap:\n{sitemap_xml}")  #PARSED AND CREATED

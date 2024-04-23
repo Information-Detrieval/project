@@ -5,6 +5,7 @@ import os
 import pickle
 import time
 import json
+from typing import List
 from urllib.parse import urlparse, urljoin
 import xml.etree.ElementTree as ET
 
@@ -37,6 +38,11 @@ from langchain.chains import RetrievalQA
 path = os.getcwd()
 
 
+def scrape_websites(websites):
+    scraped_data = WebScraper(websites).scrape_websites()
+    return scraped_data
+
+
 class DataPipeline():
     def __init__(self, name):
         self.name = name
@@ -50,25 +56,31 @@ class DataPipeline():
         self.websites = ""
         self.index = None
 
-    def scrape_websites(self, websites):
-        scraped_data = WebScraper(websites).scrape_websites()
+    def form_sitemap(self, websites):
         unique_domains = list(set([urlparse(website).netloc for website in websites]))
+        print("Unique domains:", unique_domains)
         mapping = {urlparse(website).netloc: website for website in websites}
-        with open("mapping.pkl", "wb") as f:
-            pickle.dump(mapping, f)
 
-        mapping = pickle.load(open("mapping.pkl", "rb"))
+        temp_json = json.load(open("mapping.json", "r"))
+        mapping.update(temp_json)
+        print("adi",mapping )
+        with open("mapping.json", "w") as f:
+            json.dump(mapping, f)
+
+        mapping = json.load(open("mapping.json", "r"))
         print(mapping)
 
-        # create the sitemap for each domain and url and store it in an xml file
+        # create the sitemap for each domain and url and store it in a xml file
         for domain in unique_domains:
-            sitemap = self.create_sitemap(mapping[domain], 2)
+            print(domain)
+            sitemap = self.create_sitemap(mapping[domain], 1)
 
             # Create the root element
             urlset = ET.Element('urlset', {
                 'xmlns': 'http://www.sitemaps.org/schemas/sitemap/0.9',
                 'xmlns:xsi': 'http://www.w3.org/2001/XMLSchema-instance',
-                'xsi:schemaLocation': 'http://www.sitemaps.org/schemas/sitemap/0.9 http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd'
+                'xsi:schemaLocation': 'http://www.sitemaps.org/schemas/sitemap/0.9 '
+                                      'http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd'
             })
 
             # Add each URL to the sitemap
@@ -81,36 +93,49 @@ class DataPipeline():
 
             # Write the XML data to the file
             tree = ET.ElementTree(urlset)
-            path_sitemap = os.path.join(path, "website_data", "sitemaps", domain + ".xml")
+            path_sitemap = os.path.join(path, "website_data", "sitemaps", domain.split(".")[0] + ".xml")
+            print(path_sitemap)
             tree.write(path_sitemap, encoding='utf-8', xml_declaration=True)
+            return path_sitemap
 
-        return scraped_data
-        # return WebScraper(websites).scrape_websites()
-
-    def create_sitemap(self, base_url, depth):
+    def create_sitemap(self, base_url, depth) -> List[str]:
+        # print(depth)
         if depth <= 0:
-            return []
+            return [base_url]
 
         sitemap = [base_url]
         try:
             response = requests.get(base_url)
+            # print("page content", response)
             soup = BeautifulSoup(response.text, 'html.parser')
-
-            links = soup.find_all('a')
-            for link in links[:depth]:  # Limit the number of links to follow
-                url = link.get('href')
-                if url:
+            links = soup.find_all('a', href=True)  # Ensure href attribute exists
+            print('LINK COUNT:', len(links), 'DEPTH:', depth)
+            for link in links:  # Limit the number of links to follow
+                url = link['href']  # Use dictionary-like access for href
+                if url.startswith('/'):
+                    url = urlparse(base_url).netloc + url
+                if url.startswith('http') or url.startswith('www'):  # Skip mailto or javascript links
                     # Resolve relative links
-                    url = urljoin(base_url, url)
+                    # url = urljoin(base_url, url)
                     # Check if the URL is still on the same domain
-                    if urlparse(url).netloc == urlparse(base_url).netloc:
+                    netloc1 = urlparse(url).netloc
+                    netloc2 = urlparse(base_url).netloc
+                    if netloc1.startswith("www."):
+                        netloc1 = netloc1[4:]
+                    if netloc2.startswith("www."):
+                        netloc2 = netloc2[4:]
+                    if netloc1 == netloc2:
+                        print('Following:', url)
                         sitemap += self.create_sitemap(url, depth - 1)
+                    else:
+                        print(urlparse(url).netloc + ' != ' + urlparse(base_url).netloc)
+                else:
+                    print('Skipping:', url)
         except requests.exceptions.RequestException:
             pass
 
         # Remove duplicates
-        sitemap = list(set(sitemap))
-
+        # sitemap = list(set(sitemap))
         # Save sitemap to a file
         with open("sitemap.xml", 'w') as f:
             json.dump(sitemap, f)
@@ -229,7 +254,6 @@ class DataPipeline():
         )
 
         retriever = vector_store.as_retriever()
-
 
         qa = RetrievalQA.from_chain_type(
             llm=llm,

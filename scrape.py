@@ -21,6 +21,7 @@ from lxml import etree
 from nltk import word_tokenize, PorterStemmer, WordNetLemmatizer
 from nltk.corpus import stopwords
 
+path = os.getcwd()
 
 def preprocess_text(text: str) -> str:
     text = text.lower()
