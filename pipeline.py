@@ -206,7 +206,7 @@ class DataPipeline():
         #         "metadata": metadata
         #     }])
 
-        retriever = VectorIndexRetriever()
+        retriever = VectorIndexRetriever(self.index)
         retrieved_nodes = retriever.retrieve(query_str)
         return retrieved_nodes
 
@@ -227,13 +227,14 @@ class DataPipeline():
             model_name='gpt-3.5-turbo',
             temperature=0.0
         )
-        x: VectorStoreIndex
+
+        retriever = vector_store.as_retriever()
 
 
         qa = RetrievalQA.from_chain_type(
             llm=llm,
             chain_type="stuff",
-            retriever=VectorIndexRetriever(self.index)
+            retriever=retriever
         )
 
         return qa.invoke(query)
@@ -264,24 +265,24 @@ def img_ir_pre(image_website):
 
 
 if __name__ == "__main__":
-    websites = ["https://www.iiitd.ac.in/dhruv"]
-    df = pd.read_csv("Combined-QnA.csv")
-    img_db = DataPipeline(name="img")
-    # temp.scrape_websites(["https://www.latestlaws.com/bare-acts/central-acts-rules/ipc-section-166a-punishment-for-non-recording-of-information-/"])
-    # temp.scrape_sitemap("news.xml")
-    # temp.scrape_sitemap("law.xml")
-    img_db.initialize_documents("img_txt")
-    obj = img_db.run_query(
-        "I want to see a terracotta image")
-    for i in range(3):
-        print(obj[i].metadata['url'])
-        img = Image.open(os.path.join(path, "website_data", "imgs", str(obj[i].metadata['url'])))
-        img = img.convert("RGB")
-        img.show()
+    # websites = ["https://www.iiitd.ac.in/dhruv"]
+    # df = pd.read_csv("Combined-QnA.csv")
+    # img_db = DataPipeline(name="img")
+    # # temp.scrape_websites(["https://www.latestlaws.com/bare-acts/central-acts-rules/ipc-section-166a-punishment-for-non-recording-of-information-/"])
+    # # temp.scrape_sitemap("news.xml")
+    # # temp.scrape_sitemap("law.xml")
+    # img_db.initialize_documents("img_txt")
+    # obj = img_db.run_query(
+    #     "I want to see a terracotta image")
+    # for i in range(3):
+    #     print(obj[i].metadata['url'])
+    #     img = Image.open(os.path.join(path, "website_data", "imgs", str(obj[i].metadata['url'])))
+    #     img = img.convert("RGB")
+    #     img.show()
 
     text_db = DataPipeline("txt")
     text_db.initialize_documents("txt")
-    print(text_db.run_query(
+    print(text_db.generativeQnA(
         "What is the punishment for a public servant unlawfully buying or bidding for property under Section 169 of "
         "the IPC?"))
     new_rows = []
