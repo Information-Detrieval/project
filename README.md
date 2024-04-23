@@ -29,6 +29,9 @@ Backend of the Information Detrevial
 7. To run the code with NEW Vectors and NEW data
     - Delete the storage folder
     - Delete the pkl/documents.pkl file
-8. Add the new sitemap locaiton `scrape_sitemap("law.xml")` line of the code.
 
-8. Run `python backend.py`. You would see a loading bar in the console that shows that the vectors have been upserterd. If not please redo the step 7.
+8. Run `python backend.py`. You might see a loading bar in the console that shows that the vectors have been upserted.
+
+9. Goto `chrome://extensions/` in your browser and enable developer mode. Click on `Load unpacked` and select the `extension` repo (in the same Github org as this repo).
+
+10. Open a new tab and click on the extension icon. You should see the extension popup alongwith the chat UI.

@@ -7,23 +7,19 @@ import requests
 import pickle
 from bs4 import BeautifulSoup
 import os
-
-from llama_index.core import (
-    VectorStoreIndex,
-    SimpleDirectoryReader,
-    load_index_from_storage,
-    Settings,
-    PromptTemplate,
-)
-import xml.etree.ElementTree as ET
+from nltk import word_tokenize, PorterStemmer
+from nltk.corpus import stopwords
 
 from lxml import etree
-from nltk import word_tokenize, PorterStemmer, WordNetLemmatizer
-from nltk.corpus import stopwords
+from concurrent.futures import ThreadPoolExecutor
+
+stemmer = PorterStemmer()
 
 path = os.getcwd()
 
 def preprocess_text(text: str) -> str:
+
+
     text = text.lower()
 
     tokens = word_tokenize(text)
@@ -34,11 +30,7 @@ def preprocess_text(text: str) -> str:
     stop_words = set(stopwords.words('english'))
     tokens = [word for word in tokens if word not in stop_words]
 
-    stemmer = PorterStemmer()
     tokens = [stemmer.stem(word) for word in tokens]
-
-    lemmatizer = WordNetLemmatizer()
-    tokens = [lemmatizer.lemmatize(word) for word in tokens]
 
     return " ".join(tokens)
 
@@ -60,7 +52,6 @@ class WebScraper:
         self.html_dir = os.path.join(os.getcwd(), "website_data", "html")
         self.pkl_dir = os.path.join(os.getcwd(), "website_data", "txt")
         self.json_dir = os.path.join(os.getcwd(), "website_data", "meta_data")
-        self.mapping_file = "mapping.pkl"
 
         os.makedirs(self.html_dir, exist_ok=True)
         os.makedirs(self.pkl_dir, exist_ok=True)
@@ -73,52 +64,53 @@ class WebScraper:
         with open(filepath, "w", encoding="utf-8") as f:
             f.write(content)
 
-    def scrape_websites(self):
+    def scrape_website(self, website):
+        print(f"Scraping {website}...")
         mapping = {}
-        for website in self.websites:
-            print(f"Scraping {website}...")
-            try:
-                r = requests.get(website)
-                raw_html = r.text
+        try:
+            r = requests.get(website)
+            raw_html = r.text
 
-                soup = BeautifulSoup(raw_html, 'html.parser')
-                title = preprocess_text(soup.title.string)
+            soup = BeautifulSoup(raw_html, 'html.parser')
+            title = preprocess_text(soup.title.string)
 
-                if website.startswith("https://www.latestlaws.com"):
-                    selector = "#content-area > div > div > div.col-md-6.order-1.order-sm-1.order-md-2 > div:nth-child(4) > div:nth-child(1) > div.page-content.actdetail.act-single-page"
-                    # selected_elements = soup.select(selector)
-                    # if selected_elements:  # Check if the list is not empty
-                    #     soup = selected_elements[0]
-                    soup = soup.select(selector)[0]
-                #      TODO: Aditya there was an error so I added the if statement to check if the list is empty or not , cause it was giving me empty list
+            if website.startswith("https://www.latestlaws.com"):
+                selector = "#content-area > div > div > div.col-md-6.order-1.order-sm-1.order-md-2 > div:nth-child(4) > div:nth-child(1) > div.page-content.actdetail.act-single-page"
+                soup = soup.select(selector)[0]
 
-                data = soup.get_text()
-                html = soup.prettify()
-                filename = self._get_filename(website)
-                html_filepath = os.path.join(self.html_dir, f"{filename}.html")
-                pkl_filepath = os.path.join(self.pkl_dir, f"{filename}.txt")
-                json_filepath = os.path.join(self.json_dir, f"{filename}.json")
+            data = soup.get_text()
+            html = soup.prettify()
+            filename = self._get_filename(website)
+            html_filepath = os.path.join(self.html_dir, f"{filename}.html")
+            pkl_filepath = os.path.join(self.pkl_dir, f"{filename}.txt")
+            json_filepath = os.path.join(self.json_dir, f"{filename}.json")
 
-                # self._write_to_file(pkl_filepath+".txt", data)
-                # remove repeated blank lines, but retain single new lines
-                txt = re.sub('\n{2,}', '\n', data)
+            txt = re.sub('\n{2,}', '\n', data)
 
-                self._write_to_file(html_filepath, r.text)
-                self._write_to_file(pkl_filepath, txt)
-                self._write_to_file(json_filepath, json.dumps({
-                    "title": title,
-                    "url": website,
-                    "text": txt,
-                    "html": html,
-                }, indent=4))
+            self._write_to_file(html_filepath, r.text)
+            self._write_to_file(pkl_filepath, txt)
+            self._write_to_file(json_filepath, json.dumps({
+                "title": title,
+                "url": website,
+                "text": txt,
+                "html": html,
+            }, indent=4))
 
-                mapping[website] = f"{filename}.pkl"
+            mapping[website] = f"{filename}.pkl"
 
-            except Exception as e:
-                print(f"Error scraping {website}: {e}")
+        except Exception as e:
+            print(f"Error scraping {website}: {e}")
 
-        # with open(self.mapping_file, "wb") as f:
-        #     pickle.dump(mapping, f)
+        return mapping
+
+    def scrape_websites(self, max_workers=20):
+        with ThreadPoolExecutor(max_workers=max_workers) as executor:
+            results = executor.map(self.scrape_website, self.websites)
+
+        mapping = {}
+        for result in results:
+            mapping.update(result)
+
         return self.html_dir, self.pkl_dir
 
     def get_html(self, website):
@@ -140,16 +132,6 @@ class WebScraper:
                 print(f"Data for {website}:\n{data}")
         except FileNotFoundError:
             print(f"Data file for {website} not found.")
-
-    def get_mapping(self):
-        try:
-            with open(self.mapping_file, "rb") as f:
-                mapping = pickle.load(f)
-                print("Mapping:")
-                for website, filename in mapping.items():
-                    print(f"{website} -> {filename}")
-        except FileNotFoundError:
-            print("Mapping file not found.")
 
     # extract data from XML sitemap and call scrape
 

@@ -9,10 +9,11 @@ import re
 import json
 
 # The URL of the webpage you want to scrape
-url = 'https://en.wikipedia.org/wiki/India'
+url = 'https://www.qutubminar.org/'
 
 
 def call(url):
+    print("Image Scraping started for", url)
     # Folder where the images and their alt texts will be stored
     parent_folder = 'website_data'
     images_folder = os.path.join(parent_folder, 'imgs')
@@ -30,13 +31,13 @@ def call(url):
     soup = BeautifulSoup(response.content, 'html.parser')
 
     # Create a Markdown file to store the scraped text
-    with open('Scraping/scraped_content_india.md', 'w', encoding='utf-8') as md_file:
-        for element in soup.find_all(['p', 'h1', 'h2', 'h3']):
-            # Assuming you want to capture paragraphs and headers
-            if element.name.startswith('h'):
-                md_file.write(f"\n# {element.get_text()}\n\n")  # Header with markdown format
-            else:
-                md_file.write(f"{element.get_text()}\n\n")  # Paragraph
+    # with open('Scraping/scraped_content_india.md', 'w', encoding='utf-8') as md_file:
+    #     for element in soup.find_all(['p', 'h1', 'h2', 'h3']):
+    #         # Assuming you want to capture paragraphs and headers
+    #         if element.name.startswith('h'):
+    #             md_file.write(f"\n# {element.get_text()}\n\n")  # Header with markdown format
+    #         else:
+    #             md_file.write(f"{element.get_text()}\n\n")  # Paragraph
 
     #to download the image and store the alt text/related text of the image
 
@@ -108,8 +109,10 @@ def call(url):
         with open(image_info_path, 'w', encoding='utf-8') as json_file:
             json.dump(data, json_file, indent=4, ensure_ascii=False)
 
-    with open('Scraping/images_info.json', 'w', encoding='utf-8') as json_file:
-        json.dump(images_info, json_file, indent=4, ensure_ascii=False)
+    print("Image Scraping done for", url)
+
+    # with open('Scraping/images_info.json', 'w', encoding='utf-8') as json_file:
+    #     json.dump(images_info, json_file, indent=4, ensure_ascii=False)
 
 
 if __name__ == '__main__':

@@ -4,6 +4,8 @@ import pickle
 from urllib.parse import urlparse
 
 from flask import Flask, request, jsonify
+
+from img_scrape import call
 from pipeline import DataPipeline
 from flask_cors import CORS
 
@@ -32,7 +34,10 @@ def start_sitemap():
             if urlparse(website).netloc not in mapping.keys():
                 if os.path.isdir("storage"):
                     shutil.rmtree("storage")
-                    os.remove("website_data/pkl/txt_documents.pkl")
+                    if os.path.exists("website_data/pkl/imgs_txt_documents.pkl"):
+                        os.remove("website_data/pkl/imgs_txt_documents.pkl")
+                    if os.path.exists("website_data/pkl/txt_documents.pkl"):
+                        os.remove("website_data/pkl/txt_documents.pkl")
                     files = os.listdir("website_data/meta_data")
 
                     # Iterate over each file and delete it
@@ -78,6 +83,7 @@ def start_sitemap():
                 #     pipeline_text.scrape_sitemap(i)
                 # pipeline_img.initialize_documents("img_txt")
                 pipeline_text.initialize_documents("txt")
+                call(website)
     return jsonify({})
 
 

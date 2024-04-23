@@ -5,6 +5,7 @@ import os
 import pickle
 import time
 import json
+from concurrent import futures
 from typing import List
 from urllib.parse import urlparse, urljoin
 import xml.etree.ElementTree as ET
@@ -250,7 +251,7 @@ class DataPipeline():
 
         pipeline_img = DataPipeline("img")
         pipeline_img.initialize_documents("imgs_txt")
-        img_output = pipeline_img.run_query(query)
+        img_output = pipeline_img.run_query(query.split("^%$*^$$")[1])
         if len(img_output) > 0 and img_output[0].score < 0.55:
             img_output = []
         llm = ChatOpenAI(
@@ -299,9 +300,15 @@ class DataPipeline():
 
         chain = retrieval_qa_chat_prompt | llm
 
-        context = self.run_query(query)
+        def run_query_parallel(query):
+            return self.run_query(query)
 
-        if len(context) == 0:
+        with futures.ThreadPoolExecutor() as executor:
+            query1 = query.replace("^%$*^$$", "")
+            query2 = query.split("^%$*^$$")[1]
+            context1, context2 = executor.map(run_query_parallel, [query1, query2])
+
+        if (len(context1) + len(context2)) == 0:
             return {
                 "answer": "No relevant documents found."
             }
@@ -310,34 +317,18 @@ class DataPipeline():
                 list(map(lambda x: json.dumps(
                     {"title": x.metadata['title'], "url": x.metadata['url'], "content": x.text},
                     indent=4
-                ), context)))
+                ), context1)) + list(map(lambda x: json.dumps(
+                    {"title": x.metadata['title'], "url": x.metadata['url'], "content": x.text},
+                    indent=4
+                ), context2)))
 
-        invocation_input = {"input": query, "context": context, "convo": convo}
+        invocation_input = {"input": query.split("^%$*^$$")[1], "context": context, "convo": convo}
         if len(img_output) > 0:
             invocation_input["img_url"] = img_output[0].metadata['url']
             invocation_input["img_desc"] = img_output[0].text
 
         reply = chain.invoke(invocation_input)
         return {"answer":reply.content}
-
-
-def img_ir_pre(image_website):
-    json_name = "images_info.json"
-    with open(json_name, "r") as f:
-        img_json_file = json.load(f)
-
-    for entry in img_json_file:
-        title = entry["title"]
-        url = entry["url"]
-        text = entry["text"]
-        image_path = os.path.join(image_website, url)
-        text_path = os.path.join(image_website, url[:len(url) - 4] + ".txt")
-
-        if os.path.exists(image_path) and os.path.exists(text_path):
-            shutil.copy(image_path, os.path.join("website_data/imgs", url))
-            shutil.copy(text_path, os.path.join("website_data/img_txt", title + ".txt"))
-            with open(os.path.join("website_data/img_json", title + ".json"), "w") as json_file:
-                json.dump(entry, json_file, indent=4)
 
 
 # For processing images
