@@ -302,7 +302,9 @@ class DataPipeline():
         context = self.run_query(query)
 
         if len(context) == 0:
-            raise Exception("No relevant documents found")
+            return {
+                "answer": "No relevant documents found."
+            }
         else:
             context = "\n----------------------------------------------------------\n".join(
                 list(map(lambda x: json.dumps(
