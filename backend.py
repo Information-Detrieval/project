@@ -8,21 +8,24 @@ app = Flask(__name__)
 CORS(app)
 
 pipeline_text = DataPipeline("txt")
-pipeline_text.initialize_documents("txt")
-
 pipeline_img = DataPipeline("img")
-pipeline_img.initialize_documents("img_txt")
+
+path = os.getcwd()
 
 
 @app.route('/scrape_websites', methods=['POST'])
 def scrape_websites():
     websites = request.get_json()['websites']
     # delete Scraping/
-    os.system("rm -rf storage/")
-    os.system("rm -rf website_data/pkl")
-    os.system("mkdir -p website_data/pkl")
-    result = pipeline_text.scrape_websites(websites)
-    pipeline_text.initialize_documents("txt")
+    # os.system("rm -rf storage/")
+    # os.system("rm -rf website_data/pkl")
+    # os.system("mkdir -p website_data/pkl")
+    # result = pipeline_text.scrape_websites(websites)
+    # iterate over the files of the sitemaps
+    # for i in os.listdir(os.path.join(path, "website_data", "sitemaps")):
+    #     pipeline_text.scrape_sitemap(i)
+    # pipeline_img.initialize_documents("img_txt")
+    # pipeline_text.initialize_documents("txt")
     return jsonify({})
 
 
