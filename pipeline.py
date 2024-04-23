@@ -8,6 +8,7 @@ import json
 from urllib.parse import urlparse, urljoin
 import xml.etree.ElementTree as ET
 
+import langchain
 import requests
 from bs4 import BeautifulSoup
 from langchain import hub
@@ -42,10 +43,11 @@ from langchain_pinecone import PineconeVectorStore as langchainVectorStore
 from langchain_openai import ChatOpenAI
 from langchain.chains import RetrievalQA
 
+langchain.verbose = True
+langchain.debug = True
+
 path = os.getcwd()
 
-class Answer(BaseModel):
-    reply :str = Field( description="The output")
 
 class DataPipeline():
     def __init__(self, name):
@@ -212,7 +214,7 @@ class DataPipeline():
         retrieved_nodes = retriever.retrieve(query_str)
         return retrieved_nodes
 
-    def invoke(self, query):
+    def invoke(self, query, convo):
 
         pipeline_img = DataPipeline("img")
         pipeline_img.initialize_documents("imgs_txt")
@@ -225,8 +227,8 @@ class DataPipeline():
             temperature=0.0
         )
 
-        retrieval_qa_chat_prompt = ChatPromptTemplate.from_template("""Answer the following question based 
-        only on the provided context. Provide detailed answers and provide output in html, along with appropriate use 
+        retrieval_qa_chat_prompt = ChatPromptTemplate.from_template("""Answer the following question based on
+        provided context only. Past user queries are also provided. Provide detailed answers and provide output in html, along with appropriate use 
         of headings, bold and italic text:
             
             <context>
@@ -235,36 +237,54 @@ class DataPipeline():
             
             Question: {input}
             
-            """+("" if len(img_output) == 0 else """
-            Also, add the provided image URL to the appropriate place in the output if the provided image description seems relevant:
-            Image URL: {img_url}
-            Image Description: {img_desc}
+            Past user queries:
+            {convo}
+            
+            """ + ("" if len(img_output) == 0 else """
+            Also, add the Image URL to the appropriate place in the output only if the provided Image Description is relevant to the provided question. Do not add the image if Image Description is not relevant to the question:
+                Image Description: {img_desc}
+                Image URL: {img_url}
             """))
 
-        combine_docs_chain = create_stuff_documents_chain(
-            llm,
-            retrieval_qa_chat_prompt
-        )
+        # combine_docs_chain = create_stuff_documents_chain(
+        #     llm,
+        #     retrieval_qa_chat_prompt
+        # )
 
-        model_name = 'text-embedding-ada-002'
-        embed = OpenAIEmbeddings(
-            model=model_name,
-            openai_api_key=self.OPENAI_API_KEY
-        )
+        # model_name = 'text-embedding-ada-002'
+        # embed = OpenAIEmbeddings(
+        #     model=model_name,
+        #     openai_api_key=self.OPENAI_API_KEY
+        # )
 
-        text_field = "url"  # the metadata field that contains our context
+        # text_field = "url"  # the metadata field that contains our context
 
-        vector_store = langchainVectorStore(self.pinecone_index, embed, text_field)
+        # vector_store = PineconeVectorStore(self.pinecone_index, embed, text_field)
 
-        retriever = vector_store.as_retriever()
-        retrieval_chain = create_retrieval_chain(retriever, combine_docs_chain)
+        # retriever = vector_store.as_retriever()
+        # retriever = VectorIndexRetriever(self.index)
+        # retrieval_chain = create_retrieval_chain(retriever, combine_docs_chain)
 
-        invocation_input = {"input": query}
+        chain = retrieval_qa_chat_prompt | llm
+
+        context = self.run_query(query)
+
+        if len(context) == 0:
+            raise Exception("No relevant documents found")
+        else:
+            context = "\n----------------------------------------------------------\n".join(
+                list(map(lambda x: json.dumps(
+                    {"title": x.metadata['title'], "url": x.metadata['url'], "content": x.text},
+                    indent=4
+                ), context)))
+
+        invocation_input = {"input": query, "context": context, "convo": convo}
         if len(img_output) > 0:
             invocation_input["img_url"] = img_output[0].metadata['url']
             invocation_input["img_desc"] = img_output[0].text
-        reply = retrieval_chain.invoke(invocation_input)
-        return reply
+
+        reply = chain.invoke(invocation_input)
+        return {"answer":reply.content}
 
 
 def img_ir_pre(image_website):

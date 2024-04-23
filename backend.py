@@ -40,7 +40,7 @@ def run_query():
     if request.method == 'POST':
         query_str = request.get_json()
         print(query_str['query_str'])
-        result = pipeline_text.invoke(query_str['query_str'])
+        result = pipeline_text.invoke(query_str['query_str'], query_str['convo'])
         print(result)
         try:
             reply = result['answer']
