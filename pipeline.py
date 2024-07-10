@@ -60,8 +60,8 @@ class DataPipeline():
     def __init__(self, name):
         self.name = name
         self.pkl_dir = os.path.join(path, "website_data", "pkl")
-        self.OPENAI_API_KEY = "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"
-        self.PINECONE_API_KEY = "8a73267f-d64d-4d53-a5ae-0a241afd5517"
+        self.OPENAI_API_KEY = "" # openAi Key
+        self.PINECONE_API_KEY = "" # pinecone Key
         os.environ["OPENAI_API_KEY"] = self.OPENAI_API_KEY
         os.environ["PINECONE_API_KEY"] = self.PINECONE_API_KEY
         self.PERSIST_DIR = os.path.join(path, "storage", self.name)
